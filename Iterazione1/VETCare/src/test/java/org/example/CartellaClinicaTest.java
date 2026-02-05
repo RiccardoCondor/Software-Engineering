@@ -14,4 +14,21 @@ class CartellaClinicaTest {
         String exp = "anamnesi";
         assertEquals(exp, c.RicercaVisita(1).getAnamnesi());
     }
+
+    @Test
+    void inserisciVisita(){
+        CartellaClinica c = new CartellaClinica();
+        c.NuovaVisita("a","e","d",1);
+        String exp = "a";
+        assertEquals(exp, c.getVisitaCorrente().getAnamnesi());
+    }
+
+    @Test
+    void RicercaVisite(){
+        int idexp = 1;
+        CartellaClinica c = new CartellaClinica();
+        c.NuovaVisita("anamnesi", "esameObbiettivo", "diagnosi", idexp);
+        c.ConfermaVisit();
+        assertEquals(idexp, c.RicercaVisita(1).getIdvisit());
+    }
 }
