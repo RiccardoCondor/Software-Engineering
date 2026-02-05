@@ -9,6 +9,7 @@ class VetCareTest {
     // 1) Codice fiscale non presente: viene creato un nuovo proprietario
     // 2) Codice fiscale già presente: viene restituito il proprietario esistente
     // 3) Caso limite: parametri null, accettati dall'implementazione
+    // 4) caso limite: Ricezione di una stringa vuota
     @org.junit.jupiter.api.Test
     void inserisciNuovaAnagrafica() {
         VetCare v = new VetCare();
@@ -29,12 +30,19 @@ class VetCareTest {
         // Inserimento di nome,cf o contatto null
         Proprietario p2 = v.inserisciNuovaAnagrafica(null, "MC43R5", "334789");
         assertNull(p2);
+
+        // Inserimento di una stringa vuota
+        Proprietario p3 = v.inserisciNuovaAnagrafica("", "MC43R5", "334789");
+        assertNull(p3);
+
+
     }
 
     // Classi di equivalenza individuate in base al comportamento del metodo:
     // 1) Microchip non presente: viene creato un nuovo animale
     // 2) Microchip già presente: viene restituito l'animale esistente
     // 3) Caso limite: parametri null o microchip <= 0, ritorna null
+    // 4) cado limite: inserimento di una stringa vuota
     @org.junit.jupiter.api.Test
     void inserisciNuovoAnimale() {
         VetCare v = new VetCare();
@@ -54,6 +62,10 @@ class VetCareTest {
         // Inserimento di nome,microchip(<=0),specie,data,razza o proprietario null
         Animale a2= v.inserisciNuovoAnimale(null, "cane", "Labrodor", -2442, LocalDate.of(2020, 12, 2), p);
         assertNull(a2);
+
+        //inserimento stringa vuota
+        Animale a3= v.inserisciNuovoAnimale("", "cane", "Labrodor", 2442, LocalDate.of(2020, 12, 2), p);
+        assertNull(a3);
     }
 
 
@@ -95,7 +107,7 @@ class VetCareTest {
 
         assertNotNull(v.getAnimaleCorrente().getCartella().getVisitaCorrente());
 
-        //Inserimento codice microchip o idvist <=0
+        //Inserimento codice microchip <=0
         v.nuovaVisita(-1244, "anamnesi", "esame", "diagnosi");
         assertNull(v.getAnimaleCorrente());
 

@@ -8,15 +8,20 @@ public class CartellaClinica {
     private Visita visitaCorrente;
 
     public CartellaClinica() {
-        visite = new HashMap<Integer, Visita>();
+        visite = new HashMap<>();
         visitaCorrente = null;
     }
 
     public void nuovaVisita(String anamnesi, String esameObiettivo, String diagnosi) {
+        visitaCorrente = null;
+        if(anamnesi == null || esameObiettivo == null || diagnosi == null ||
+                anamnesi.isEmpty() || esameObiettivo.isEmpty() || diagnosi.isEmpty())
+            return;
         visitaCorrente = new Visita(anamnesi, esameObiettivo, diagnosi);
     }
 
     public void confermaVisita() {
+        if(visitaCorrente == null)return;
         visite.put(visitaCorrente.getIdVisita(), visitaCorrente);
     }
 
