@@ -65,6 +65,11 @@ public class VetCare {
             System.out.println("Animale gia esistente");
             return animali.get(microchip);
         }
+        if(nome==null || microchip<=0 || razza==null || specie==null || dataNascita==null || proprietario==null)
+        {
+            System.out.println("Riepire tutti i campi correttamente");
+            return null;
+        }
         animaleCorrente = new Animale(nome, specie, razza, microchip, dataNascita, proprietario);
         return animaleCorrente;
     }
@@ -78,11 +83,22 @@ public class VetCare {
     }
 
     public void NuovaVisita(int microchip, String anamnesi, String esameObbiettivo, String diagnosi, int idvist) {
+        animaleCorrente=null;
+        if(microchip<=0 || idvist <=0) {
+            System.out.println("Codice microchip o id visita errato");
+            return;
+        }
         animaleCorrente = animali.get(Integer.valueOf(microchip));
+        if(animaleCorrente==null) {
+            System.out.println("Codice microchip non trovato");
+            return;
+        }
         animaleCorrente.getCartella().NuovaVisita(anamnesi, esameObbiettivo, diagnosi, idvist);
     }
 
     public void confermaVisit() {
+        if(animaleCorrente==null) return;
+
         animaleCorrente.getCartella().ConfermaVisit();
     }
 }
