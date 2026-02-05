@@ -42,18 +42,38 @@ public class VetCare {
     }
 
     public Propietario InserisciNuovaAnagrafica(String nome, String cf, String contatto) {
+        proprietarioCorrente=null;
+        if(proprietari.get(cf) != null)
+        {
+            System.out.println("Proprietario già esistente");
+            return proprietari.get(cf);
+        }
+        if(nome==null || cf==null || contatto==null)
+        {
+            System.out.println("Riepire tutti i campi");
+            return null;
+        }
         proprietarioCorrente = new Propietario(nome, cf, contatto);
         return proprietarioCorrente;
     }
 
     public Animale InserisciNuovoAnimale(String nome, String specie, String razza, int microchip, LocalDate dataNascita,
             Propietario proprietario) {
+        animaleCorrente= null;
+        if(animali.get(microchip) != null)
+        {
+            System.out.println("Animale gia esistente");
+            return animali.get(microchip);
+        }
         animaleCorrente = new Animale(nome, specie, razza, microchip, dataNascita, proprietario);
         return animaleCorrente;
     }
 
     public void confermaRegistrazione() {
+        if(proprietarioCorrente!= null)
         proprietari.put(proprietarioCorrente.getCf(), proprietarioCorrente);
+
+        if(animaleCorrente!=null)
         animali.put(Integer.valueOf(animaleCorrente.getMicrochip()), animaleCorrente);
     }
 

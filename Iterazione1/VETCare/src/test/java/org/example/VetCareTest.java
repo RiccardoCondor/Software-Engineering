@@ -8,12 +8,23 @@ class VetCareTest {
     @org.junit.jupiter.api.Test
     void inserisciNuovaAnagrafica() {
         VetCare v = new VetCare();
+
+        //Inserimento codice fiscale non esistente
         String Nome = "Rick";
         String CF = "rcr123";
         String Contatto = "334742";
         Propietario p = v.InserisciNuovaAnagrafica(Nome, CF, Contatto);
         String exp = "Rick";
         assertEquals(exp, v.getProprietarioCorrente().getNome());
+        v.confermaRegistrazione();
+
+        // Inserimento codice fiscale esistente
+        Propietario p1 = v.InserisciNuovaAnagrafica("Giulia", CF, "334789");
+        assertEquals(p,p1);
+
+        // Inserimento di nome,cf o contatto null
+        Propietario p2 = v.InserisciNuovaAnagrafica(null, "MC43R5", "334789");
+        assertNull(p2);
     }
 
     @org.junit.jupiter.api.Test
