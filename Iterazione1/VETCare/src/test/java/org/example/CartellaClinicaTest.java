@@ -31,4 +31,15 @@ class CartellaClinicaTest {
         c.ConfermaVisit();
         assertEquals(idexp, c.RicercaVisita(1).getIdvisit());
     }
+
+    @Test
+    void testGetVisite() {
+        CartellaClinica c = new CartellaClinica();
+        c.NuovaVisita("anamnesi1", "esameObbiettivo1", "diagnosi1", 1);
+        c.ConfermaVisit();
+        c.NuovaVisita("anamnesi2", "esameObbiettivo2", "diagnosi2", 2);
+        c.ConfermaVisit();
+
+        assertEquals(2, c.getVisite().size());
+    }
 }
