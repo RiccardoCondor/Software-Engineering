@@ -107,8 +107,6 @@ public class Menu {
         } else {
             System.out.println("Visita annullata.");
         }
-
-        System.out.println("Visita aggiunta con successo!");
     }
 
     private void visualizzaAnimali() {
