@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VetCare {
-    private Map<String, Propietario> proprietari;
+    private Map<String, Proprietario> proprietari;
     private Map<Integer, Animale> animali;
-    private Propietario proprietarioCorrente;
+    private Proprietario proprietarioCorrente;
     private Animale animaleCorrente;
 
     public VetCare() {
@@ -17,56 +17,58 @@ public class VetCare {
         animaleCorrente = null;
     }
 
-    public java.util.Collection<Propietario> getProprietari() {
-        return proprietari.values();
+    public java.util.Collection<Proprietario> getProprietari() {
+        return java.util.Collections.unmodifiableCollection(proprietari.values());
     }
 
     public java.util.Collection<Animale> getAnimali() {
-        return animali.values();
+        return java.util.Collections.unmodifiableCollection(animali.values());
     }
 
     public Animale getAnimaleCorrente() {
         return animaleCorrente;
     }
 
-    public Propietario getProprietarioCorrente() {
+    public Proprietario getProprietarioCorrente() {
         return proprietarioCorrente;
     }
 
-    public Animale RicercaAnimale(int microchip) {
-        return animali.get(Integer.valueOf(microchip));
+    public Animale ricercaAnimale(int microchip) {
+        return animali.get(microchip);
     }
 
-    public Propietario RicercaProprietari(String CF) {
+    public Proprietario ricercaProprietari(String CF) {
         return proprietari.get(CF);
     }
 
-    public Propietario InserisciNuovaAnagrafica(String nome, String cf, String contatto) {
-        proprietarioCorrente=null;
-        if(proprietari.get(cf) != null)
-        {
+    public Proprietario inserisciNuovaAnagrafica(String nome, String cf, String contatto) {
+        proprietarioCorrente = null;
+        if (proprietari.get(cf) != null) {
             System.out.println("Proprietario già esistente");
             return proprietari.get(cf);
         }
-        if(nome==null || cf==null || contatto==null)
-        {
+        proprietarioCorrente = null;
+        if (proprietari.get(cf) != null) {
+            System.out.println("Proprietario già esistente");
+            return proprietari.get(cf);
+        }
+        if (nome == null || cf == null || contatto == null || nome.isEmpty() || cf.isEmpty() || contatto.isEmpty()) {
             System.out.println("Riepire tutti i campi");
             return null;
         }
-        proprietarioCorrente = new Propietario(nome, cf, contatto);
+        proprietarioCorrente = new Proprietario(nome, cf, contatto);
         return proprietarioCorrente;
     }
 
-    public Animale InserisciNuovoAnimale(String nome, String specie, String razza, int microchip, LocalDate dataNascita,
-            Propietario proprietario) {
-        animaleCorrente= null;
-        if(animali.get(microchip) != null)
-        {
+    public Animale inserisciNuovoAnimale(String nome, String specie, String razza, int microchip, LocalDate dataNascita,
+            Proprietario proprietario) {
+        animaleCorrente = null;
+        if (animali.get(microchip) != null) {
             System.out.println("Animale gia esistente");
             return animali.get(microchip);
         }
-        if(nome==null || microchip<=0 || razza==null || specie==null || dataNascita==null || proprietario==null)
-        {
+        if (nome == null || microchip <= 0 || razza == null || specie == null || dataNascita == null
+                || proprietario == null || nome.isEmpty() || razza.isEmpty() || specie.isEmpty()) {
             System.out.println("Riepire tutti i campi correttamente");
             return null;
         }
@@ -75,30 +77,31 @@ public class VetCare {
     }
 
     public void confermaRegistrazione() {
-        if(proprietarioCorrente!= null)
-        proprietari.put(proprietarioCorrente.getCf(), proprietarioCorrente);
+        if (proprietarioCorrente != null)
+            proprietari.put(proprietarioCorrente.getCf(), proprietarioCorrente);
 
-        if(animaleCorrente!=null)
-        animali.put(Integer.valueOf(animaleCorrente.getMicrochip()), animaleCorrente);
+        if (animaleCorrente != null)
+            animali.put(animaleCorrente.getMicrochip(), animaleCorrente);
     }
 
-    public void NuovaVisita(int microchip, String anamnesi, String esameObbiettivo, String diagnosi, int idvist) {
-        animaleCorrente=null;
-        if(microchip<=0 || idvist <=0) {
-            System.out.println("Codice microchip o id visita errato");
+    public void nuovaVisita(int microchip, String anamnesi, String esameObiettivo, String diagnosi) {
+        animaleCorrente = null;
+        if (microchip <= 0) {
+            System.out.println("Codice microchip errato");
             return;
         }
-        animaleCorrente = animali.get(Integer.valueOf(microchip));
-        if(animaleCorrente==null) {
+        animaleCorrente = animali.get(microchip);
+        if (animaleCorrente == null) {
             System.out.println("Codice microchip non trovato");
             return;
         }
-        animaleCorrente.getCartella().NuovaVisita(anamnesi, esameObbiettivo, diagnosi, idvist);
+        animaleCorrente.getCartella().nuovaVisita(anamnesi, esameObiettivo, diagnosi);
     }
 
-    public void confermaVisit() {
-        if(animaleCorrente==null) return;
+    public void confermaVisita() {
+        if (animaleCorrente == null)
+            return;
 
-        animaleCorrente.getCartella().ConfermaVisit();
+        animaleCorrente.getCartella().confermaVisita();
     }
 }

@@ -17,17 +17,17 @@ class VetCareTest {
         String Nome = "Rick";
         String CF = "rcr123";
         String Contatto = "334742";
-        Propietario p = v.InserisciNuovaAnagrafica(Nome, CF, Contatto);
+        Proprietario p = v.InserisciNuovaAnagrafica(Nome, CF, Contatto);
         String exp = "Rick";
         assertEquals(exp, v.getProprietarioCorrente().getNome());
         v.confermaRegistrazione();
 
         // Inserimento codice fiscale esistente
-        Propietario p1 = v.InserisciNuovaAnagrafica("Giulia", CF, "334789");
+        Proprietario p1 = v.InserisciNuovaAnagrafica("Giulia", CF, "334789");
         assertEquals(p,p1);
 
         // Inserimento di nome,cf o contatto null
-        Propietario p2 = v.InserisciNuovaAnagrafica(null, "MC43R5", "334789");
+        Proprietario p2 = v.InserisciNuovaAnagrafica(null, "MC43R5", "334789");
         assertNull(p2);
     }
 
@@ -41,7 +41,7 @@ class VetCareTest {
         String Nome = "Rick";
         String specie = "rcr123";
         String Contatto = "334742";
-        Propietario p = v.InserisciNuovaAnagrafica(Nome, specie, Contatto);
+        Proprietario p = v.InserisciNuovaAnagrafica(Nome, specie, Contatto);
         Animale a = v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         String exp = "nika";
         assertEquals(exp, v.getAnimaleCorrente().getNome());
@@ -68,13 +68,13 @@ class VetCareTest {
         String Nome = "Rick";
         String specie = "rcr123";
         String Contatto = "334742";
-        Propietario p = v.InserisciNuovaAnagrafica(Nome, specie, Contatto);
+        Proprietario p = v.InserisciNuovaAnagrafica(Nome, specie, Contatto);
         Animale a = v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
         assertEquals(a, v.RicercaAnimale(1234));
 
         //Inserimento campi non validi
-        Propietario p1 = v.InserisciNuovaAnagrafica(null, "K421E", "433434");
+        Proprietario p1 = v.InserisciNuovaAnagrafica(null, "K421E", "433434");
         Animale a1 = v.InserisciNuovoAnimale("Usagna", "Uccello", "usignolo", -1234, LocalDate.of(2020, 12, 2), p1);
         v.confermaRegistrazione();
 
@@ -87,7 +87,7 @@ class VetCareTest {
 
         //Caso principale di successo
         VetCare v = new VetCare();
-        Propietario p = v.InserisciNuovaAnagrafica("Rick", "rcr123", "334742");
+        Proprietario p = v.InserisciNuovaAnagrafica("Rick", "rcr123", "334742");
         v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
 
@@ -109,7 +109,7 @@ class VetCareTest {
 
         //Caso in cui i dati sono corretti
         VetCare v = new VetCare();
-        Propietario p = v.InserisciNuovaAnagrafica("Rick", "rcr123", "334742");
+        Proprietario p = v.InserisciNuovaAnagrafica("Rick", "rcr123", "334742");
         v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
 

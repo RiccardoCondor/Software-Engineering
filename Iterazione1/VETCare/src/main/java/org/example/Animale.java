@@ -8,11 +8,11 @@ public class Animale {
     private String razza;
     private int microchip;
     private LocalDate dataNascita;
-    private Propietario proprietario;
+    private Proprietario proprietario;
     private CartellaClinica cartella;
 
     public Animale(String nome, String specie, String razza, int microchip, LocalDate dataNascita,
-            Propietario proprietario) {
+            Proprietario proprietario) {
         this.nome = nome;
         this.specie = specie;
         this.razza = razza;
@@ -42,7 +42,7 @@ public class Animale {
         return dataNascita;
     }
 
-    public Propietario getProprietario() {
+    public Proprietario getProprietario() {
         return proprietario;
     }
 

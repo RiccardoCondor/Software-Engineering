@@ -53,23 +53,35 @@ public class Menu {
         System.out.println("\n--- Inserimento Nuova Anagrafica ---");
 
         // Dati Proprietario
-        System.out.println("Inserisci dati Proprietario:");
-        String nomeProp = leggiStringa("Nome: ");
-        String cfProp = leggiStringa("Codice Fiscale: ");
-        String contattoProp = leggiStringa("Contatto: ");
+        Proprietario prop = null;
+        do {
+            System.out.println("Inserisci dati Proprietario:");
+            String nomeProp = leggiStringa("Nome: ");
+            String cfProp = leggiStringa("Codice Fiscale: ");
+            String contattoProp = leggiStringa("Contatto: ");
 
-        Propietario prop = controller.InserisciNuovaAnagrafica(nomeProp, cfProp, contattoProp);
+            controller.inserisciNuovaAnagrafica(nomeProp, cfProp, contattoProp);
+            prop = controller.getProprietarioCorrente();
+            if (prop == null) {
+                System.out.println("dati errati, riprova");
+            }
+        } while (prop == null);
 
         // Dati Animale
-        System.out.println("Inserisci dati Animale:");
-        String nomeAnimale = leggiStringa("Nome: ");
-        String specie = leggiStringa("Specie: ");
-        String razza = leggiStringa("Razza: ");
-        int microchip = leggiIntero("Microchip (numero intero): ");
-        LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");
+        Animale animale = null;
+        do {
+            System.out.println("Inserisci dati Animale:");
+            String nomeAnimale = leggiStringa("Nome: ");
+            String specie = leggiStringa("Specie: ");
+            String razza = leggiStringa("Razza: ");
+            int microchip = leggiIntero("Microchip (numero intero): ");
+            LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");
 
-        controller.InserisciNuovoAnimale(nomeAnimale, specie, razza, microchip, dataNascita, prop);
-
+            animale = controller.inserisciNuovoAnimale(nomeAnimale, specie, razza, microchip, dataNascita, prop);
+            if (animale == null) {
+                System.out.println("dati errati, riprova");
+            }
+        } while (animale == null);
         System.out.println("Premi 1 per confermare la registrazione, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
         if ("1".equals(conferma)) {
@@ -84,7 +96,7 @@ public class Menu {
         System.out.println("\n--- Inserimento Nuova Visita ---");
 
         int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
-        Animale animale = controller.RicercaAnimale(microchip);
+        Animale animale = controller.ricercaAnimale(microchip);
 
         if (animale == null) {
             System.out.println("Errore: Animale con microchip " + microchip + " non trovato.");
@@ -96,13 +108,12 @@ public class Menu {
         String anamnesi = leggiStringa("Anamnesi: ");
         String esame = leggiStringa("Esame Obbiettivo: ");
         String diagnosi = leggiStringa("Diagnosi: ");
-        int idVisita = leggiIntero("ID Visita (numero intero): ");
 
-        controller.NuovaVisita(microchip, anamnesi, esame, diagnosi, idVisita);
+        controller.nuovaVisita(microchip, anamnesi, esame, diagnosi);
         System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
         if ("1".equals(conferma)) {
-            controller.confermaVisit();
+            controller.confermaVisita();
             System.out.println("Visita completata con successo!");
         } else {
             System.out.println("Visita annullata.");
@@ -112,7 +123,7 @@ public class Menu {
     private void visualizzaAnimali() {
         System.out.println("\n--- Elenco Animali e Proprietari ---");
         for (Animale a : controller.getAnimali()) {
-            Propietario p = a.getProprietario();
+            Proprietario p = a.getProprietario();
             String nomeProp = (p != null) ? p.getNome() : "N/D";
             System.out.println("microchip: " + a.getMicrochip() + ", Nome: " + a.getNome() +
                     ", Specie: " + a.getSpecie() + ", Razza: " + a.getRazza() +
@@ -123,7 +134,7 @@ public class Menu {
     private void visualizzaVisiteAnimale() {
         System.out.println("\n--- Visualizza Visite Animale ---");
         int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
-        Animale animale = controller.RicercaAnimale(microchip);
+        Animale animale = controller.ricercaAnimale(microchip);
 
         if (animale == null) {
             System.out.println("Errore: Animale non trovato.");
@@ -138,7 +149,7 @@ public class Menu {
                 System.out.println("Nessuna visita registrata.");
             } else {
                 for (Visita v : visite) {
-                    System.out.println("ID: " + v.getIdvisit() +
+                    System.out.println("ID: " + v.getIdVisita() +
                             " | Data: N/A" + // Visita doesn't have a date field yet based on file view
                             " | Diagnosi: " + v.getDiagnosi() +
                             " | Anamnesi: " + v.getAnamnesi());

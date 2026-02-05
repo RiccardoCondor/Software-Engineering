@@ -1,11 +1,11 @@
 package org.example;
 
-public class Propietario {
+public class Proprietario {
     private String nome;
     private String cf;
     private String contatto;
 
-    public Propietario(String nome, String cf, String contatto) {
+    public Proprietario(String nome, String cf, String contatto) {
         this.nome = nome;
         this.cf = cf;
         this.contatto = contatto;

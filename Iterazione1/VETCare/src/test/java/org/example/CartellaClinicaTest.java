@@ -9,36 +9,37 @@ class CartellaClinicaTest {
     @Test
     void confermaVisit() {
         CartellaClinica c = new CartellaClinica();
-        c.NuovaVisita("anamnesi", "esameObbiettivo", "diagnosi", 1);
-        c.ConfermaVisit();
+        c.nuovaVisita("anamnesi", "esameObbiettivo", "diagnosi");
+        c.confermaVisita();
+        int id = c.getVisitaCorrente().getIdVisita();
         String exp = "anamnesi";
-        assertEquals(exp, c.RicercaVisita(1).getAnamnesi());
+        assertEquals(exp, c.ricercaVisita(id).getAnamnesi());
     }
 
     @Test
-    void inserisciVisita(){
+    void inserisciVisita() {
         CartellaClinica c = new CartellaClinica();
-        c.NuovaVisita("a","e","d",1);
+        c.nuovaVisita("a", "e", "d");
         String exp = "a";
         assertEquals(exp, c.getVisitaCorrente().getAnamnesi());
     }
 
     @Test
-    void RicercaVisite(){
-        int idexp = 1;
+    void ricercaVisite() {
         CartellaClinica c = new CartellaClinica();
-        c.NuovaVisita("anamnesi", "esameObbiettivo", "diagnosi", idexp);
-        c.ConfermaVisit();
-        assertEquals(idexp, c.RicercaVisita(1).getIdvisit());
+        c.nuovaVisita("anamnesi", "esameObbiettivo", "diagnosi");
+        c.confermaVisita();
+        int id = c.getVisitaCorrente().getIdVisita();
+        assertEquals(id, c.ricercaVisita(id).getIdVisita());
     }
 
     @Test
     void testGetVisite() {
         CartellaClinica c = new CartellaClinica();
-        c.NuovaVisita("anamnesi1", "esameObbiettivo1", "diagnosi1", 1);
-        c.ConfermaVisit();
-        c.NuovaVisita("anamnesi2", "esameObbiettivo2", "diagnosi2", 2);
-        c.ConfermaVisit();
+        c.nuovaVisita("anamnesi1", "esameObbiettivo1", "diagnosi1");
+        c.confermaVisita();
+        c.nuovaVisita("anamnesi2", "esameObbiettivo2", "diagnosi2");
+        c.confermaVisita();
 
         assertEquals(2, c.getVisite().size());
     }

@@ -12,23 +12,23 @@ public class CartellaClinica {
         visitaCorrente = null;
     }
 
-    public void NuovaVisita(String anamnesi, String esameObbiettivo, String diagnosi, int idvisit) {
-        visitaCorrente = new Visita(anamnesi, esameObbiettivo, diagnosi, idvisit);
+    public void nuovaVisita(String anamnesi, String esameObiettivo, String diagnosi) {
+        visitaCorrente = new Visita(anamnesi, esameObiettivo, diagnosi);
     }
 
-    public void ConfermaVisit() {
-        visite.put(Integer.valueOf(visitaCorrente.getIdvisit()), visitaCorrente);
+    public void confermaVisita() {
+        visite.put(visitaCorrente.getIdVisita(), visitaCorrente);
     }
 
     public Visita getVisitaCorrente() {
         return visitaCorrente;
     }
 
-    public Visita RicercaVisita(int idvisit) {
-        return visite.get(Integer.valueOf(idvisit));
+    public Visita ricercaVisita(int idVisita) {
+        return visite.get(idVisita);
     }
 
     public java.util.Collection<Visita> getVisite() {
-        return visite.values();
+        return java.util.Collections.unmodifiableCollection(visite.values());
     }
 }

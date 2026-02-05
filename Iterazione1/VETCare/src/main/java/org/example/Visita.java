@@ -1,20 +1,20 @@
 package org.example;
 
 public class Visita {
+    private static int idVisita = 0;
     private String anamnesi;
-    private String esameObbiettivo;
+    private String esameObiettivo;
     private String diagnosi;
-    private int idvisit;
 
-    public Visita(String anamnesi,String esameObbiettivo,String diagnosi,int idvisit){
+    public Visita(String anamnesi, String esameObiettivo, String diagnosi) {
         this.anamnesi = anamnesi;
-        this.esameObbiettivo = esameObbiettivo;
+        this.esameObiettivo = esameObiettivo;
         this.diagnosi = diagnosi;
-        this.idvisit = idvisit;
+        this.idVisita = ++idVisita;
     }
 
-    public int getIdvisit() {
-        return idvisit;
+    public int getIdVisita() {
+        return idVisita;
     }
 
     public String getAnamnesi() {
@@ -25,7 +25,7 @@ public class Visita {
         return diagnosi;
     }
 
-    public String getEsameObbiettivo() {
-        return esameObbiettivo;
+    public String getEsameObiettivo() {
+        return esameObiettivo;
     }
 }
