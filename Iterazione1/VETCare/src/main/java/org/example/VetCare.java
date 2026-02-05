@@ -17,6 +17,14 @@ public class VetCare {
         animaleCorrente = null;
     }
 
+    public java.util.Collection<Propietario> getProprietari() {
+        return proprietari.values();
+    }
+
+    public java.util.Collection<Animale> getAnimali() {
+        return animali.values();
+    }
+
     public Animale getAnimaleCorrente() {
         return animaleCorrente;
     }
@@ -49,12 +57,12 @@ public class VetCare {
         animali.put(Integer.valueOf(animaleCorrente.getMicrochip()), animaleCorrente);
     }
 
-    public void NuovaVisita(int microchip, String anamnesi, String esameObbiettivo, String diagnosi, int idvist){
+    public void NuovaVisita(int microchip, String anamnesi, String esameObbiettivo, String diagnosi, int idvist) {
         animaleCorrente = animali.get(Integer.valueOf(microchip));
         animaleCorrente.getCartella().NuovaVisita(anamnesi, esameObbiettivo, diagnosi, idvist);
     }
 
-    public void confermaVisit(){
+    public void confermaVisit() {
         animaleCorrente.getCartella().ConfermaVisit();
     }
 }
