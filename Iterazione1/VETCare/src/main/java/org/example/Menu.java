@@ -99,7 +99,14 @@ public class Menu {
         int idVisita = leggiIntero("ID Visita (numero intero): ");
 
         controller.NuovaVisita(microchip, anamnesi, esame, diagnosi, idVisita);
-        controller.confermaVisit();
+        System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
+        String conferma = scanner.nextLine();
+        if ("1".equals(conferma)) {
+            controller.confermaVisit();
+            System.out.println("Visita completata con successo!");
+        } else {
+            System.out.println("Visita annullata.");
+        }
 
         System.out.println("Visita aggiunta con successo!");
     }
