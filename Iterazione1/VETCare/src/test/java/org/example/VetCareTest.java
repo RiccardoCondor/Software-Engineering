@@ -17,17 +17,17 @@ class VetCareTest {
         String Nome = "Rick";
         String CF = "rcr123";
         String Contatto = "334742";
-        Proprietario p = v.InserisciNuovaAnagrafica(Nome, CF, Contatto);
+        Proprietario p = v.inserisciNuovaAnagrafica(Nome, CF, Contatto);
         String exp = "Rick";
         assertEquals(exp, v.getProprietarioCorrente().getNome());
         v.confermaRegistrazione();
 
         // Inserimento codice fiscale esistente
-        Proprietario p1 = v.InserisciNuovaAnagrafica("Giulia", CF, "334789");
+        Proprietario p1 = v.inserisciNuovaAnagrafica("Giulia", CF, "334789");
         assertEquals(p,p1);
 
         // Inserimento di nome,cf o contatto null
-        Proprietario p2 = v.InserisciNuovaAnagrafica(null, "MC43R5", "334789");
+        Proprietario p2 = v.inserisciNuovaAnagrafica(null, "MC43R5", "334789");
         assertNull(p2);
     }
 
@@ -41,18 +41,18 @@ class VetCareTest {
         String Nome = "Rick";
         String specie = "rcr123";
         String Contatto = "334742";
-        Proprietario p = v.InserisciNuovaAnagrafica(Nome, specie, Contatto);
-        Animale a = v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
+        Proprietario p = v.inserisciNuovaAnagrafica(Nome, specie, Contatto);
+        Animale a = v.inserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         String exp = "nika";
         assertEquals(exp, v.getAnimaleCorrente().getNome());
         v.confermaRegistrazione();
 
         // Inserimento microchip esistente
-        Animale a1 = v.InserisciNuovoAnimale("Whisky", "cane", "Labrodor", 1234, LocalDate.of(2020, 12, 2), p);
+        Animale a1 = v.inserisciNuovoAnimale("Whisky", "cane", "Labrodor", 1234, LocalDate.of(2020, 12, 2), p);
         assertEquals(a,a1);
 
         // Inserimento di nome,microchip(<=0),specie,data,razza o proprietario null
-        Animale a2= v.InserisciNuovoAnimale(null, "cane", "Labrodor", -2442, LocalDate.of(2020, 12, 2), p);
+        Animale a2= v.inserisciNuovoAnimale(null, "cane", "Labrodor", -2442, LocalDate.of(2020, 12, 2), p);
         assertNull(a2);
     }
 
@@ -68,14 +68,14 @@ class VetCareTest {
         String Nome = "Rick";
         String specie = "rcr123";
         String Contatto = "334742";
-        Proprietario p = v.InserisciNuovaAnagrafica(Nome, specie, Contatto);
-        Animale a = v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
+        Proprietario p = v.inserisciNuovaAnagrafica(Nome, specie, Contatto);
+        Animale a = v.inserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
-        assertEquals(a, v.RicercaAnimale(1234));
+        assertEquals(a, v.ricercaAnimale(1234));
 
         //Inserimento campi non validi
-        Proprietario p1 = v.InserisciNuovaAnagrafica(null, "K421E", "433434");
-        Animale a1 = v.InserisciNuovoAnimale("Usagna", "Uccello", "usignolo", -1234, LocalDate.of(2020, 12, 2), p1);
+        Proprietario p1 = v.inserisciNuovaAnagrafica(null, "K421E", "433434");
+        Animale a1 = v.inserisciNuovoAnimale("Usagna", "Uccello", "usignolo", -1234, LocalDate.of(2020, 12, 2), p1);
         v.confermaRegistrazione();
 
         assertNull(p1);
@@ -87,20 +87,20 @@ class VetCareTest {
 
         //Caso principale di successo
         VetCare v = new VetCare();
-        Proprietario p = v.InserisciNuovaAnagrafica("Rick", "rcr123", "334742");
-        v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
+        Proprietario p = v.inserisciNuovaAnagrafica("Rick", "rcr123", "334742");
+        v.inserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
 
-        v.NuovaVisita(1234, "anamnesi", "esame", "diagnosi", 1);
+        v.nuovaVisita(1234, "anamnesi", "esame", "diagnosi");
 
-        assertEquals(1, v.getAnimaleCorrente().getCartella().getVisitaCorrente().getIdvisit());
+        assertNotNull(v.getAnimaleCorrente().getCartella().getVisitaCorrente());
 
         //Inserimento codice microchip o idvist <=0
-        v.NuovaVisita(-1244, "anamnesi", "esame", "diagnosi", 2);
+        v.nuovaVisita(-1244, "anamnesi", "esame", "diagnosi");
         assertNull(v.getAnimaleCorrente());
 
         //Inserimento di un codice microchip non esistente
-        v.NuovaVisita(1123, "anamnesi", "esame", "diagnosi", 3);
+        v.nuovaVisita(1123, "anamnesi", "esame", "diagnosi");
         assertNull((v.getAnimaleCorrente()));
     }
 
@@ -109,20 +109,21 @@ class VetCareTest {
 
         //Caso in cui i dati sono corretti
         VetCare v = new VetCare();
-        Proprietario p = v.InserisciNuovaAnagrafica("Rick", "rcr123", "334742");
-        v.InserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
+        Proprietario p = v.inserisciNuovaAnagrafica("Rick", "rcr123", "334742");
+        v.inserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
 
-        v.NuovaVisita(1234, "anamnesi", "esame", "diagnosi", 1);
-        v.confermaVisit();
+        v.nuovaVisita(1234, "anamnesi", "esame", "diagnosi");
+        v.confermaVisita();
 
-        assertNotNull(v.getAnimaleCorrente().getCartella().RicercaVisita(1));
-        assertEquals("diagnosi", v.getAnimaleCorrente().getCartella().RicercaVisita(1).getDiagnosi());
+
+        assertNotNull(v.getAnimaleCorrente().getCartella().ricercaVisita(1));
+        assertEquals("diagnosi", v.getAnimaleCorrente().getCartella().ricercaVisita(1).getDiagnosi());
 
 
         //Caso in cui microchip non viene trovato
-        v.NuovaVisita(1256, "anamnesi", "esame", "diagnosi", 5);
-        v.confermaVisit();
+        v.nuovaVisita(1256, "anamnesi", "esame", "diagnosi");
+        v.confermaVisita();
         assertNull(v.getAnimaleCorrente());
 
     }
