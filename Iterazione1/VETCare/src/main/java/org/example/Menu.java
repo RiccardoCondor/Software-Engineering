@@ -87,7 +87,7 @@ public class Menu {
                 animale = controller.ricercaAnimale(microchip);
                 if(animale != null){
                     System.out.println("animale già presente nel sistema");
-                    System.out.println("digita -1 per uscire dall'inserimento anagrafica");
+                    System.out.println("digita -1 per USCIRE dall'inserimento anagrafica O CORREGGI");
                 }
             }while(animale != null);
             LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");

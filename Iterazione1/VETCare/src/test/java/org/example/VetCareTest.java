@@ -13,7 +13,6 @@ class VetCareTest {
     @org.junit.jupiter.api.Test
     void inserisciNuovaAnagrafica() {
         VetCare v = VetCare.getInstance();
-
         //Inserimento codice fiscale non esistente
         String Nome = "Rick";
         String CF = "rcr123";

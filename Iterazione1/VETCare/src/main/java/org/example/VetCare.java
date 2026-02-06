@@ -52,12 +52,8 @@ public class VetCare {
         proprietarioCorrente = null;
         if (proprietari.get(cf) != null) {
             System.out.println("Proprietario già esistente");
-            return proprietari.get(cf);
-        }
-        proprietarioCorrente = null;
-        if (proprietari.get(cf) != null) {
-            System.out.println("Proprietario già esistente");
-            return proprietari.get(cf);
+            proprietarioCorrente = proprietari.get(cf);
+            return proprietarioCorrente;
         }
         if (nome == null || cf == null || contatto == null || nome.isEmpty() || cf.isEmpty() || contatto.isEmpty()) {
             System.out.println("Riepire tutti i campi");
@@ -72,7 +68,8 @@ public class VetCare {
         animaleCorrente = null;
         if (animali.get(microchip) != null) {
             System.out.println("Animale gia esistente");
-            return animali.get(microchip);
+            animaleCorrente = animali.get(microchip);
+            return animaleCorrente;
         }
         if (nome == null || microchip <= 0 || razza == null || specie == null || dataNascita == null
                 || proprietario == null || nome.isEmpty() || razza.isEmpty() || specie.isEmpty()) {
