@@ -74,7 +74,16 @@ public class Menu {
             String nomeAnimale = leggiStringa("Nome: ");
             String specie = leggiStringa("Specie: ");
             String razza = leggiStringa("Razza: ");
-            int microchip = leggiIntero("Microchip (numero intero): ");
+            int microchip = -111;
+            do {
+                microchip= leggiIntero("Microchip (numero intero): ");
+                if(microchip == -1)return;
+                animale = controller.ricercaAnimale(microchip);
+                if(animale != null){
+                    System.out.println("animale già presente nel sistema");
+                    System.out.println("digita -1 per uscire dall'inserimento anagrafica");
+                }
+            }while(animale != null);
             LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");
 
             animale = controller.inserisciNuovoAnimale(nomeAnimale, specie, razza, microchip, dataNascita, prop);
@@ -104,12 +113,16 @@ public class Menu {
         }
 
         System.out.println("Animale trovato: " + animale.getNome() + " (" + animale.getSpecie() + ")");
+        do {
+            String anamnesi = leggiStringa("Anamnesi: ");
+            String esame = leggiStringa("Esame Obbiettivo: ");
+            String diagnosi = leggiStringa("Diagnosi: ");
 
-        String anamnesi = leggiStringa("Anamnesi: ");
-        String esame = leggiStringa("Esame Obbiettivo: ");
-        String diagnosi = leggiStringa("Diagnosi: ");
-
-        controller.nuovaVisita(microchip, anamnesi, esame, diagnosi);
+            controller.nuovaVisita(microchip, anamnesi, esame, diagnosi);
+            if(controller.getAnimaleCorrente().getCartella().getVisitaCorrente() == null){
+                System.out.println("riempi tutti i campi");
+            }
+        }while(controller.getAnimaleCorrente().getCartella().getVisitaCorrente() == null);
         System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
         if ("1".equals(conferma)) {
@@ -150,7 +163,7 @@ public class Menu {
             } else {
                 for (Visita v : visite) {
                     System.out.println("ID: " + v.getIdVisita() +
-                            " | Data: N/A" + // Visita doesn't have a date field yet based on file view
+                            " | Esame obiettivo: " + v.getEsameObiettivo() +
                             " | Diagnosi: " + v.getDiagnosi() +
                             " | Anamnesi: " + v.getAnamnesi());
                 }
