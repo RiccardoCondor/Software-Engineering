@@ -55,9 +55,15 @@ public class Menu {
         // Dati Proprietario
         Proprietario prop = null;
         do {
+
             System.out.println("Inserisci dati Proprietario:");
-            String nomeProp = leggiStringa("Nome: ");
             String cfProp = leggiStringa("Codice Fiscale: ");
+            prop = controller.ricercaProprietari(cfProp);
+            if(prop != null){
+                System.out.println("Seleziono Propietario esistente");
+                break;
+            }
+            String nomeProp = leggiStringa("Nome: ");
             String contattoProp = leggiStringa("Contatto: ");
 
             controller.inserisciNuovaAnagrafica(nomeProp, cfProp, contattoProp);
@@ -103,14 +109,18 @@ public class Menu {
 
     private void gestisciNuovaVisita() {
         System.out.println("\n--- Inserimento Nuova Visita ---");
+        int microchip = -111;
+        Animale animale = null;
+        do {
+            microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+            animale = controller.ricercaAnimale(microchip);
 
-        int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
-        Animale animale = controller.ricercaAnimale(microchip);
-
-        if (animale == null) {
-            System.out.println("Errore: Animale con microchip " + microchip + " non trovato.");
-            return;
-        }
+            if (animale == null) {
+                System.out.println("Errore: Animale con microchip " + microchip + " non trovato.");
+                System.out.println("effettua la registrazione");
+                gestisciNuovaAnagrafica();
+            }
+        }while(animale == null);
 
         System.out.println("Animale trovato: " + animale.getNome() + " (" + animale.getSpecie() + ")");
         do {
