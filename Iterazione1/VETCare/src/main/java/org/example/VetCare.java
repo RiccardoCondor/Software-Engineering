@@ -9,8 +9,15 @@ public class VetCare {
     private Map<Integer, Animale> animali;
     private Proprietario proprietarioCorrente;
     private Animale animaleCorrente;
+    private static VetCare instance;
 
-    public VetCare() {
+    public static VetCare getInstance() {
+        if (instance == null) {
+            instance = new VetCare();
+        }
+        return instance;
+    }
+    private VetCare() {
         proprietari = new HashMap<>();
         animali = new HashMap<>();
         proprietarioCorrente = null;

@@ -12,7 +12,7 @@ class VetCareTest {
     // 4) caso limite: Ricezione di una stringa vuota
     @org.junit.jupiter.api.Test
     void inserisciNuovaAnagrafica() {
-        VetCare v = new VetCare();
+        VetCare v = VetCare.getInstance();
 
         //Inserimento codice fiscale non esistente
         String Nome = "Rick";
@@ -45,7 +45,7 @@ class VetCareTest {
     // 4) cado limite: inserimento di una stringa vuota
     @org.junit.jupiter.api.Test
     void inserisciNuovoAnimale() {
-        VetCare v = new VetCare();
+        VetCare v = VetCare.getInstance();
         String Nome = "Rick";
         String specie = "rcr123";
         String Contatto = "334742";
@@ -76,7 +76,7 @@ class VetCareTest {
     void confermaRegistrazione() {
 
         //Test funzionamento normale
-        VetCare v = new VetCare();
+        VetCare v = VetCare.getInstance();
         String Nome = "Rick";
         String specie = "rcr123";
         String Contatto = "334742";
@@ -98,7 +98,7 @@ class VetCareTest {
     void testNuovaVisita() {
 
         //Caso principale di successo
-        VetCare v = new VetCare();
+        VetCare v = VetCare.getInstance();
         Proprietario p = v.inserisciNuovaAnagrafica("Rick", "rcr123", "334742");
         v.inserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
@@ -120,7 +120,7 @@ class VetCareTest {
     void testConfermaVisit() {
 
         //Caso in cui i dati sono corretti
-        VetCare v = new VetCare();
+        VetCare v = VetCare.getInstance();
         Proprietario p = v.inserisciNuovaAnagrafica("Rick", "rcr123", "334742");
         v.inserisciNuovoAnimale("nika", "cane", "maltese", 1234, LocalDate.of(2020, 12, 2), p);
         v.confermaRegistrazione();
