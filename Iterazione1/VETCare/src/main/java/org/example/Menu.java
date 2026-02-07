@@ -123,16 +123,18 @@ public class Menu {
         }while(animale == null);
 
         System.out.println("Animale trovato: " + animale.getNome() + " (" + animale.getSpecie() + ")");
+        Visita visita = null;
         do {
             String anamnesi = leggiStringa("Anamnesi: ");
             String esame = leggiStringa("Esame Obbiettivo: ");
             String diagnosi = leggiStringa("Diagnosi: ");
 
             controller.nuovaVisita(microchip, anamnesi, esame, diagnosi);
-            if(controller.getAnimaleCorrente().getCartella().getVisitaCorrente() == null){
+            visita = controller.getAnimaleCorrente().getCartella().getVisitaCorrente();
+            if(visita == null){
                 System.out.println("riempi tutti i campi");
             }
-        }while(controller.getAnimaleCorrente().getCartella().getVisitaCorrente() == null);
+        }while(visita == null);
         System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
         if ("1".equals(conferma)) {
