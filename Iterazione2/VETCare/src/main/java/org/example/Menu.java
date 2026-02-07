@@ -174,7 +174,7 @@ public class Menu {
                         farmaco = visita.selezionaFarmacoById(idFarmaco);
                         if (farmaco != null) {
                             selectionDone = true;
-                            if (!farmaco.getNome().equals(nomeFarmaco)) {
+                            if (!farmaco.getNome().equalsIgnoreCase(nomeFarmaco)) {
                                 System.out.println("Farmaco trovato non coincide con il nome inserito.");
                                 selectionDone = false;
                             }
