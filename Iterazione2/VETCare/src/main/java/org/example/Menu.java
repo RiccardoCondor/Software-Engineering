@@ -192,12 +192,12 @@ public class Menu {
                 System.out.println("Inserire un valore positivo.");
         } while (posologia <= 0);
 
-        int frequenza = 0;
+        String frequenza = "";
         do {
-            frequenza = leggiIntero("Frequenza (ogni X ore) [>0]: ");
-            if (frequenza <= 0)
-                System.out.println("Inserire un valore positivo.");
-        } while (frequenza <= 0);
+            frequenza = leggiStringa("Frequenza (es: ogni 8 ore): ");
+            if (frequenza == null || frequenza.trim().isEmpty())
+                System.out.println("Inserire una frequenza valida.");
+        } while (frequenza == null || frequenza.trim().isEmpty());
 
         LocalDate dataInizio = null;
         LocalDate dataFine = null;

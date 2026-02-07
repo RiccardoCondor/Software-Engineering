@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class Terapia {
     private static int ctr = 0;
     private int posologia = 0;
-    private int frequenza = 0;
+    private String frequenza = "";
     private LocalDate data_inizio = null;
     private LocalDate data_fine = null;
     private int idTer;
@@ -23,7 +23,7 @@ public class Terapia {
         this.data_inizio = data_inizio;
     }
 
-    public void setFrequenza(int frequenza) {
+    public void setFrequenza(String frequenza) {
         this.frequenza = frequenza;
     }
 
@@ -39,7 +39,7 @@ public class Terapia {
         return farmaco;
     }
 
-    public int getFrequenza() {
+    public String getFrequenza() {
         return frequenza;
     }
 

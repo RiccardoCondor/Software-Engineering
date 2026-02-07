@@ -43,8 +43,8 @@ public class Visita {
         return magazzino;
     }
 
-    public Terapia creaTerapia(Farmaco f, int posologia, int frequenza, LocalDate data_i, LocalDate data_f) {
-        if (f == null || posologia <= 0 || frequenza <= 0 || data_i == null || data_f == null
+    public Terapia creaTerapia(Farmaco f, int posologia, String frequenza, LocalDate data_i, LocalDate data_f) {
+        if (f == null || posologia <= 0 || frequenza == null || frequenza.isEmpty() || data_i == null || data_f == null
                 || data_i.isAfter(data_f)) {
             return null;
         }

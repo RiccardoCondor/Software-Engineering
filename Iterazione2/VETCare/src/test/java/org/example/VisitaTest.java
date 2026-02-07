@@ -7,38 +7,43 @@ import static org.junit.jupiter.api.Assertions.*;
 class VisitaTest {
 
     // Classi di equivalenza per creaTerapia:
-    // 1) Input validi: Farmaco non null, posologia > 0, frequenza > 0, date valide
+    // 1) Input validi: Farmaco non null, posologia > 0, frequenza valida (String
+    // non vuota), date valide
     // e coerenti -> Terapia creata
     // 2) Farmaco null -> return null
-    // 3) Posologia o Frequenza <= 0 -> return null
-    // 4) Date null o data_inizio > data_fine -> return null
+    // 3) Posologia <= 0 -> return null
+    // 4) Frequenza null o vuota -> return null
+    // 5) Date null o data_inizio > data_fine -> return null
     @Test
     void testCreaTerapia() {
         Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
         Farmaco f = new Farmaco("Aspirina", 1, 10, LocalDate.now().plusYears(1));
 
         // Caso 1: Input validi
-        Terapia t = visita.creaTerapia(f, 1, 2, LocalDate.now(), LocalDate.now().plusDays(5));
+        Terapia t = visita.creaTerapia(f, 1, "ogni 8 ore", LocalDate.now(), LocalDate.now().plusDays(5));
         assertNotNull(t);
         assertEquals(f, t.getFarmaco());
         assertEquals(1, t.getPosologia());
-        assertEquals(2, t.getFrequenza());
+        assertEquals("ogni 8 ore", t.getFrequenza());
 
         // Caso 2: Farmaco null
-        assertNull(visita.creaTerapia(null, 1, 2, LocalDate.now(), LocalDate.now().plusDays(5)));
+        assertNull(visita.creaTerapia(null, 1, "ogni 8 ore", LocalDate.now(), LocalDate.now().plusDays(5)));
 
         // Caso 3: Posologia <= 0
-        assertNull(visita.creaTerapia(f, 0, 2, LocalDate.now(), LocalDate.now().plusDays(5)));
-        assertNull(visita.creaTerapia(f, -5, 2, LocalDate.now(), LocalDate.now().plusDays(5)));
+        assertNull(visita.creaTerapia(f, 0, "ogni 8 ore", LocalDate.now(), LocalDate.now().plusDays(5)));
+        assertNull(visita.creaTerapia(f, -5, "ogni 8 ore", LocalDate.now(), LocalDate.now().plusDays(5)));
 
-        // Caso 3: Frequenza <= 0
-        assertNull(visita.creaTerapia(f, 1, 0, LocalDate.now(), LocalDate.now().plusDays(5)));
-        assertNull(visita.creaTerapia(f, 1, -1, LocalDate.now(), LocalDate.now().plusDays(5)));
+        // Caso 4: Frequenza null o vuota
+        assertNull(visita.creaTerapia(f, 1, null, LocalDate.now(), LocalDate.now().plusDays(5)));
+        assertNull(visita.creaTerapia(f, 1, "", LocalDate.now(), LocalDate.now().plusDays(5)));
+        // assertNull(visita.creaTerapia(f, 1, " ", LocalDate.now(),
+        // LocalDate.now().plusDays(5))); // Opzionale se gestito trim()
 
-        // Caso 4: Date non valide
-        assertNull(visita.creaTerapia(f, 1, 2, null, LocalDate.now().plusDays(5)));
-        assertNull(visita.creaTerapia(f, 1, 2, LocalDate.now(), null));
-        assertNull(visita.creaTerapia(f, 1, 2, LocalDate.now().plusDays(5), LocalDate.now())); // Inizio dopo fine
+        // Caso 5: Date non valide
+        assertNull(visita.creaTerapia(f, 1, "ogni 8 ore", null, LocalDate.now().plusDays(5)));
+        assertNull(visita.creaTerapia(f, 1, "ogni 8 ore", LocalDate.now(), null));
+        assertNull(visita.creaTerapia(f, 1, "ogni 8 ore", LocalDate.now().plusDays(5), LocalDate.now())); // Inizio dopo
+                                                                                                          // fine
     }
 
     // Classi di equivalenza per ricercaFarmaco (delega a Magazzino):
@@ -97,11 +102,11 @@ class VisitaTest {
 
         // Caso 2: Terapia presente
         Farmaco f = new Farmaco("Aspirina", 123, 10, LocalDate.of(2025, 1, 1));
-        visita.creaTerapia(f, 2, 3, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5));
+        visita.creaTerapia(f, 2, "3 volte al di", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5));
 
         String output = visita.stampaTerapia();
         assertTrue(output.contains("Terapia: Aspirina"));
         assertTrue(output.contains("Posologia: 2"));
-        assertTrue(output.contains("Frequenza: 3"));
+        assertTrue(output.contains("Frequenza: 3 volte al di"));
     }
 }
