@@ -176,6 +176,7 @@ public class Menu {
                             if (!farmaco.getNome().equals(nomeFarmaco)) {
                                 System.out.println("Farmaco trovato non coincide con il nome inserito.");
                                 selectionDone = false;
+                                farmaco = null;
                             }
                         }
 
