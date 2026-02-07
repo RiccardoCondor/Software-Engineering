@@ -166,6 +166,7 @@ public class Menu {
             if (visita.ricercaFarmaco(nomeFarmaco)) {
                 boolean selectionDone = false;
                 while (!selectionDone) {
+                    farmaco = null;
                     int idFarmaco = leggiIntero("Id del Farmaco (-1 per cercare altro nome): ");
                     if (idFarmaco == -1) {
                         selectionDone = true;
@@ -176,7 +177,6 @@ public class Menu {
                             if (!farmaco.getNome().equals(nomeFarmaco)) {
                                 System.out.println("Farmaco trovato non coincide con il nome inserito.");
                                 selectionDone = false;
-                                farmaco = null;
                             }
                         }
 
