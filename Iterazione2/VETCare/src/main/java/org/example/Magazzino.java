@@ -47,16 +47,28 @@ public class Magazzino {
     }
 
     public Farmaco selezionaFarmacoById(int id) {
+        Farmaco farmaco = getFarmacoByid(id);
+        if(farmaco != null){
+        int q = farmaco.getQuantita();
+        farmaco.setQuantita(--q);
+        }
+        return farmaco;
+    }
+
+    public Farmaco getFarmacoByid(int id) {
         if (id <= 0 || !farmaci.containsKey(id)) {
             System.out.println("ID non valido o farmaco non trovato.");
             return null;
         }
+        if (farmaci.get(id).getScadenza().isBefore(LocalDate.now())) {
+            System.out.println("Farmaco Scaduto.");
+            return null;
+        }
         int q = farmaci.get(id).getQuantita();
-        if(q == 0){
+        if (q == 0) {
             System.out.println("scorte esaurite!");
             return null;
         }
-        farmaci.get(id).setQuantita(--q);
         return farmaci.get(id);
     }
 
@@ -71,6 +83,6 @@ public class Magazzino {
         farmaci.put(5, new Farmaco("Brufen", 5, 40, LocalDate.of(2025, 5, 20)));
         farmaci.put(6, new Farmaco("Bentelan", 6, 10, LocalDate.of(2024, 12, 1)));
         farmaci.put(7, new Farmaco("Aspirina", 7, 60, LocalDate.of(2026, 3, 30)));
-        farmaci.put(7, new Farmaco("Finito", 7, 1, LocalDate.of(2026, 3, 30)));
+        farmaci.put(8, new Farmaco("Finito", 7, 1, LocalDate.of(2026, 3, 30)));
     }
 }

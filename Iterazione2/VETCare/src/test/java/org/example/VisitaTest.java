@@ -76,11 +76,11 @@ class VisitaTest {
     void testSelezionaFarmacoById() {
         Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
 
-        // Assumiamo che ID 1 esista (Tachipirina)
-        // Caso 1: ID valido
-        Farmaco f = visita.selezionaFarmacoById(1);
+        // Assumiamo che ID 2 esista (Tachipirina)
+        // Caso 1: ID valido di un farmaco non scaduto o non terminato
+        Farmaco f = visita.selezionaFarmacoById(2);
         assertNotNull(f);
-        assertEquals(1, f.getId());
+        assertEquals(2, f.getId());
 
         // Caso 2: ID non esistente
         assertNull(visita.selezionaFarmacoById(9999));
@@ -108,5 +108,21 @@ class VisitaTest {
         assertTrue(output.contains("Terapia: Aspirina"));
         assertTrue(output.contains("Posologia: 2"));
         assertTrue(output.contains("Frequenza: 3 volte al di"));
+    }
+
+    // Test per Iterazione 2
+    // Verifica che richiediEsame deleghi correttamente a Laboratorio
+    @Test
+    void testRichiediEsame() {
+        Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
+        int microchip = 999;
+
+        // Caso: Richiesta valida
+        int idEsame = visita.richiediEsame("urine", microchip);
+        assertTrue(idEsame > 0);
+
+        // Caso: Richiesta invalida (tipo sbagliato)
+        int idEsameInvalido = visita.richiediEsame("invalid", microchip);
+        assertEquals(-1, idEsameInvalido);
     }
 }

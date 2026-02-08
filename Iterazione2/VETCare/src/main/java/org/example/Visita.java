@@ -10,6 +10,8 @@ public class Visita {
     private int idVisita;
     private Terapia terapia = null;
     private Magazzino magazzino;
+    private Laboratorio laboratorio;
+    private int idEsame = -1;
 
     public Visita(String anamnesi, String esameObiettivo, String diagnosi) {
         this.anamnesi = anamnesi;
@@ -17,6 +19,7 @@ public class Visita {
         this.diagnosi = diagnosi;
         this.idVisita = ++ctr;
         this.magazzino = Magazzino.getInstance();
+        this.laboratorio = Laboratorio.getInstance();
     }
 
     public int getIdVisita() {
@@ -41,6 +44,10 @@ public class Visita {
 
     public Magazzino getMagazzino() {
         return magazzino;
+    }
+
+    public Laboratorio getLaboratorio() {
+        return laboratorio;
     }
 
     public Terapia creaTerapia(Farmaco f, int posologia, String frequenza, LocalDate data_i, LocalDate data_f) {
@@ -74,5 +81,10 @@ public class Visita {
                 + ", Frequenza: " + terapia.getFrequenza()
                 + ", Data Inizio: " + terapia.getData_inizio()
                 + ", Data Fine: " + terapia.getData_fine();
+    }
+
+    public int richiediEsame(String tipoEsame, int microchip) {
+        this.idEsame = this.laboratorio.produciesame(tipoEsame, microchip);
+        return this.idEsame;
     }
 }

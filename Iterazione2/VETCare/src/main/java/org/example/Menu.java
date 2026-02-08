@@ -21,6 +21,7 @@ public class Menu {
             System.out.println("2. Aggiungi Visita");
             System.out.println("3. Visualizza Animali e Proprietari");
             System.out.println("4. Visualizza Visite di un Animale");
+            System.out.println("5. Richiedi esami per salvarli nella cartella clinica di un animale");
             System.out.println("0. Esci");
             System.out.print("Seleziona un'opzione: ");
 
@@ -38,6 +39,9 @@ public class Menu {
                     break;
                 case "4":
                     visualizzaVisiteAnimale();
+                    break;
+                case "5":
+                    richiediEsami();
                     break;
                 case "0":
                     running = false;
@@ -118,8 +122,11 @@ public class Menu {
 
             if (animale == null) {
                 System.out.println("Errore: Animale con microchip " + microchip + " non trovato.");
-                System.out.println("effettua la registrazione");
-                gestisciNuovaAnagrafica();
+                int input = leggiIntero("voui registrare un nuovo animale? 1 si, altro no: ");
+                if (input == 1)
+                    gestisciNuovaAnagrafica();
+                else
+                    return;
             }
         } while (animale == null);
 
@@ -137,6 +144,8 @@ public class Menu {
             }
             // accedi al magazzino per aggiungere farmaci
             aggiungiTerapia(visita);
+            // accedi al laboratorio per aggiungere esami
+            aggiungiEsame(visita, microchip);
         } while (visita == null);
         System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
@@ -155,8 +164,9 @@ public class Menu {
             return;
         }
 
-        Farmaco farmaco = null;
-        while (farmaco == null) {
+        boolean find = false;
+        Farmaco target = null;
+        while (!find) {
             String nomeFarmaco = leggiStringa("Nome del Farmaco (o 'esci' per annullare): ");
             if (nomeFarmaco.equalsIgnoreCase("esci")) {
                 System.out.println("Operazione annullata.");
@@ -171,13 +181,14 @@ public class Menu {
                     if (idFarmaco == -1) {
                         selectionDone = true;
                     } else {
-                        farmaco = visita.selezionaFarmacoById(idFarmaco);
-                        if (farmaco != null) {
+                        Farmaco farmaco = null;
+                        farmaco = visita.getMagazzino().getFarmacoByid(idFarmaco);
+                        if (farmaco == null || !farmaco.getNome().equalsIgnoreCase(nomeFarmaco)) {
+                            System.out.println("Farmaco trovato non coincide con il nome inserito.");
+                        } else {
                             selectionDone = true;
-                            if (!farmaco.getNome().equalsIgnoreCase(nomeFarmaco)) {
-                                System.out.println("Farmaco trovato non coincide con il nome inserito.");
-                                selectionDone = false;
-                            }
+                            find = true;
+                            target = visita.selezionaFarmacoById(idFarmaco);
                         }
 
                     }
@@ -212,8 +223,33 @@ public class Menu {
             }
         }
 
-        visita.creaTerapia(farmaco, posologia, frequenza, dataInizio, dataFine);
+        visita.creaTerapia(target, posologia, frequenza, dataInizio, dataFine);
         System.out.println("Terapia aggiunta con successo!");
+    }
+
+    private void aggiungiEsame(Visita visita, int microchip) {
+        int scelta = leggiIntero("vuoi aggiungere un Esame? (1 per sì, altro per no): ");
+        if (scelta != 1) {
+            System.out.println("Esame non aggiunto");
+            return;
+        }
+
+        boolean done = false;
+        while (!done) {
+            String tipoEsame = leggiStringa("Tipo Esame (urine, sangue, completo) o 'esci' per annullare: ");
+            if (tipoEsame.equalsIgnoreCase("esci")) {
+                System.out.println("Operazione annullata.");
+                return;
+            }
+
+            int idEsame = visita.richiediEsame(tipoEsame, microchip);
+            if (idEsame > 0) {
+                System.out.println("Esame aggiunto con successo! ID Esame: " + idEsame);
+                done = true;
+            } else {
+                System.out.println("Errore nell'aggiunta dell'esame. Riprova (forse tipo non valido?).");
+            }
+        }
     }
 
     private void visualizzaAnimali() {
@@ -254,6 +290,33 @@ public class Menu {
             }
         } else {
             System.out.println("Cartella clinica non presente.");
+        }
+    }
+
+    private void richiediEsami() {
+        System.out.println("\n--- Richiedi e Salva Esami ---");
+        int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+        Animale animale = controller.ricercaAnimale(microchip);
+
+        if (animale == null) {
+            System.out.println("Errore: Animale non trovato.");
+            return;
+        }
+
+        System.out.println("Richiedi esami per: " + animale.getNome());
+        CartellaClinica cartella = animale.getCartella();
+        if (cartella != null) {
+            java.util.List<Esame> esami = cartella.risultatiEsami(microchip);
+            if (esami.isEmpty()) {
+                System.out.println("Nessun nuovo esame trovato per questo animale.");
+            } else {
+                System.out.println("Trovati e salvati " + esami.size() + " esami:");
+                for (Esame e : esami) {
+                    System.out.println("- Esame ID: " + e.getId() + " | Data: " + e.getData() + " | " + e.getValori());
+                }
+            }
+        } else {
+            System.out.println("Errore: Cartella clinica non trovata per questo animale.");
         }
     }
 

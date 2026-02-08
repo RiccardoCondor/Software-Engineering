@@ -45,9 +45,9 @@ class MagazzinoTest {
         Magazzino m = Magazzino.getInstance();
 
         // Caso 1: ID presente (es. 1 è Tachipirina)
-        Farmaco f = m.selezionaFarmacoById(1);
+        Farmaco f = m.selezionaFarmacoById(2);
         assertNotNull(f);
-        assertEquals(1, f.getId());
+        assertEquals(2, f.getId());
         assertEquals("Tachipirina", f.getNome());
 
         // Caso 2: ID assente
