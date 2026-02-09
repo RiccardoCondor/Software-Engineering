@@ -9,6 +9,7 @@ public class VetCare {
     private Map<Integer, Animale> animali;
     private Proprietario proprietarioCorrente;
     private Animale animaleCorrente;
+    private Map<Integer, MembroEquipe> membri;
     private Calendario calendario;
     private static VetCare instance;
 
@@ -22,9 +23,14 @@ public class VetCare {
     private VetCare() {
         proprietari = new HashMap<>();
         animali = new HashMap<>();
+        membri = new HashMap<>();
         proprietarioCorrente = null;
         animaleCorrente = null;
         this.calendario = new Calendario();
+
+
+        membri.put(1, new Anestetista(1, "Dr. Rossi"));
+        membri.put(2, new Infermiere(2, "Inf. Bianchi"));
     }
 
     public java.util.Collection<Proprietario> getProprietari() {
@@ -166,5 +172,42 @@ public class VetCare {
             throw new IllegalArgumentException("Animale non trovato");
 
         calendario.aggiungiAppuntamento(a, titolo, descrizione, inizio, fine);
+    }
+
+    // Gestione Membri Equipe
+    public void aggiungiMembroEquipe(MembroEquipe m) {
+        if (m != null && !membri.containsKey(m.getIdmembro())) {
+            membri.put(m.getIdmembro(), m);
+        }
+    }
+
+    public MembroEquipe getMembro(int id) {
+        return membri.get(id);
+    }
+
+    public java.util.Collection<MembroEquipe> getMembri() {
+        return java.util.Collections.unmodifiableCollection(membri.values());
+    }
+
+    // Creazione Operazione
+    public Operazione creaOperazione(int microchip, String titolo, String descrizione, java.time.LocalDateTime inizio,
+            java.time.LocalDateTime fine, String tipo) {
+        Animale a = animali.get(microchip);
+        if (a == null) {
+            throw new IllegalArgumentException("Animale non trovato per microchip: " + microchip);
+        }
+
+        Operazione op = new Operazione(a, titolo, descrizione, inizio, fine, tipo);
+        
+        calendario.aggiungiAppuntamento(op); 
+        return op;
+    }
+
+    public void aggiungiMembroAOperazione(Operazione op, int idMembro) {
+         MembroEquipe m = membri.get(idMembro);
+         if (m == null) {
+             throw new IllegalArgumentException("Membro non trovato: " + idMembro);
+         }
+         op.addMembro(m);
     }
 }

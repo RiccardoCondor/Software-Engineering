@@ -15,6 +15,12 @@ public class Operazione extends Appuntamento {
         membri = new HashMap<>();
     }
 
+    public void addMembro(MembroEquipe m) {
+        if (m != null) {
+            membri.put(m.getIdmembro(), m);
+        }
+    }
+
     public String getTipoOperazione() {
         return tipoOperazione;
     }

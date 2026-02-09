@@ -50,7 +50,7 @@ public class Animale {
         return cartella;
     }
 
-    // Delegate methods
+
     public void nuovaVisita(String anamnesi, String esameObiettivo, String diagnosi) {
         cartella.nuovaVisita(anamnesi, esameObiettivo, diagnosi);
     }

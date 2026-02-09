@@ -34,8 +34,16 @@ public class Calendario {
 
         LocalDate data = appuntamento.getInizio().toLocalDate();
         mappaAppuntamenti.computeIfAbsent(data, k -> new ArrayList<>()).add(appuntamento);
-        // Mantieni la lista ordinata per una più facile rilevazione delle collisioni,
         // se necessario
+        Collections.sort(mappaAppuntamenti.get(data));
+    }
+
+    public void aggiungiAppuntamento(Appuntamento app) {
+        validaAppuntamento(app);
+        verificaSovrapposizione(app);
+
+        LocalDate data = app.getInizio().toLocalDate();
+        mappaAppuntamenti.computeIfAbsent(data, k -> new ArrayList<>()).add(app);
         Collections.sort(mappaAppuntamenti.get(data));
     }
 

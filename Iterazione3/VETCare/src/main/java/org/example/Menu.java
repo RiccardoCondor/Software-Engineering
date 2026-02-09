@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Menu {
     private VetCare controller;
@@ -27,6 +29,7 @@ public class Menu {
             System.out.println("6. Visualizza calendario settimanale");
             System.out.println("7. Visualizza agenda 30 giorni");
             System.out.println("8. Aggiungi appuntamento");
+            System.out.println("9. Aggiungi Operazione");
             System.out.println("0. Esci");
             System.out.print("Seleziona un'opzione: ");
 
@@ -56,6 +59,9 @@ public class Menu {
                     break;
                 case "8":
                     flussoAggiungiAppuntamento();
+                    break;
+                case "9":
+                    flussoAggiungiOperazione();
                     break;
                 case "0":
                     running = false;
@@ -332,12 +338,6 @@ public class Menu {
         System.out.println("\n--- Richiedi e Salva Esami ---");
         int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
 
-        // Qui la logica "Richiedi e Salva" nel menu accedeva a cartella.risultatiEsami
-        // Questa logica sembrava solo visualizzare esami esistenti o processare
-        // risultati?
-        // Il nome "richiediEsami" nel menu originale stampava "Trovati e salvati...".
-        // Sembra più una visualizzazione referti.
-
         Animale animale = controller.ricercaAnimale(microchip);
         if (animale == null) {
             System.out.println("Errore: Animale non trovato.");
@@ -463,6 +463,78 @@ public class Menu {
             } catch (NumberFormatException e) {
                 System.out.println("Numero non valido.");
             }
+        }
+    }
+
+    private void flussoAggiungiOperazione() {
+        try {
+            System.out.println("\n--- Aggiungi Operazione ---");
+            int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+            if (controller.ricercaAnimale(microchip) == null) {
+                System.out.println("Errore: Animale non trovato. Registrare prima l'animale.");
+                return;
+            }
+
+            String titolo = leggiStringa("Titolo Operazione: ");
+            String descrizione = leggiStringa("Descrizione: ");
+            String tipo = leggiStringa("Tipo Operazione: ");
+
+            // Ciclo orario
+            Operazione op = null;
+            while (true) {
+                LocalDateTime inizio = ottieniDataOraValida("Inizio");
+                LocalDateTime fine = ottieniDataOraFineValida(inizio);
+                try {
+                    op = controller.creaOperazione(microchip, titolo, descrizione, inizio, fine, tipo);
+                    System.out.println("Operazione creata con successo!");
+                    break;
+                } catch (IllegalArgumentException | SovrapposizioneAppuntamentoException e) {
+                   System.out.println("Errore: " + e.getMessage());
+                   System.out.println("Riprova inserimento orario.");
+                }
+            }
+
+            // Aggiungi Membri
+            Set<Integer> membriAggiunti = new HashSet<>();
+            
+            while (true) {
+                System.out.println("\nGestione Equipe per l'operazione:");
+                System.out.println("Membri disponibili:");
+                
+                boolean disponibili = false;
+                for (MembroEquipe m : controller.getMembri()) {
+                    if (!membriAggiunti.contains(m.getIdmembro())) {
+                        System.out.println(m);
+                        disponibili = true;
+                    }
+                }
+                
+                if (!disponibili) {
+                    System.out.println("Tutti i membri sono stati aggiunti.");
+                    break;
+                }
+
+                String scelta = leggiStringa("Vuoi aggiungere un membro? (s/n): ");
+                if (!scelta.equalsIgnoreCase("s")) break;
+
+                int idMembro = leggiIntero("ID Membro: ");
+                
+                if (membriAggiunti.contains(idMembro)) {
+                    System.out.println("Membro già aggiunto.");
+                    continue;
+                }
+                
+                try {
+                    controller.aggiungiMembroAOperazione(op, idMembro);
+                    membriAggiunti.add(idMembro);
+                    System.out.println("Membro aggiunto.");
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Errore: " + e.getMessage());
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Errore imprevisto: " + e.getMessage());
         }
     }
 }
