@@ -49,4 +49,37 @@ public class Animale {
     public CartellaClinica getCartella() {
         return cartella;
     }
+
+    // Delegate methods
+    public void nuovaVisita(String anamnesi, String esameObiettivo, String diagnosi) {
+        cartella.nuovaVisita(anamnesi, esameObiettivo, diagnosi);
+    }
+
+    public void confermaVisita() {
+        cartella.confermaVisita();
+    }
+
+    public boolean haVisitaInCorso() {
+        return cartella.haVisitaInCorso();
+    }
+
+    public int richiediEsame(String tipoEsame, int microchip) {
+        return cartella.richiediEsame(tipoEsame, microchip);
+    }
+
+    public Terapia creaTerapia(Farmaco f, int posologia, String frequenza, java.time.LocalDate data_i,
+            java.time.LocalDate data_f) {
+        return cartella.creaTerapia(f, posologia, frequenza, data_i, data_f);
+    }
+
+    public boolean ricercaFarmaco(String nome) {
+        return cartella.ricercaFarmaco(nome);
+    }
+
+    public Farmaco getFarmacoById(int id) {
+        return cartella.getFarmacoById(id);
+    }
+    public Farmaco selezionaFarmacoByid(int id){
+        return cartella.selezionaFarmacoByid(id);
+    }
 }

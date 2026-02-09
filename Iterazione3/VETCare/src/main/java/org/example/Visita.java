@@ -68,7 +68,10 @@ public class Visita {
         return this.magazzino.ricercaFarmaci(nome);
     }
 
-    public Farmaco selezionaFarmacoById(int id) {
+    public Farmaco getFarmacoById(int id) {
+        return this.magazzino.getFarmacoByid(id);
+    }
+    public Farmaco selezionaFarmacoByid(int id){
         return this.magazzino.selezionaFarmacoById(id);
     }
 

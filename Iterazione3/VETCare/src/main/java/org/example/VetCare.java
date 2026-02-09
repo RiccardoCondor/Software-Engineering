@@ -109,35 +109,34 @@ public class VetCare {
                 || esameObiettivo.isEmpty() || diagnosi.isEmpty()) {
             throw new IllegalArgumentException("Dati visita incompleti");
         }
-        animaleCorrente.getCartella().nuovaVisita(anamnesi, esameObiettivo, diagnosi);
+        animaleCorrente.nuovaVisita(anamnesi, esameObiettivo, diagnosi);
     }
 
     public void aggiungiTerapia(String nomeFarmaco, int idFarmaco, int posologia, String frequenza, LocalDate inizio,
             LocalDate fine) {
-        if (animaleCorrente == null || animaleCorrente.getCartella().getVisitaCorrente() == null) {
+        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso()) {
             throw new IllegalStateException("Nessuna visita in corso per aggiungere terapia");
         }
-        Visita visita = animaleCorrente.getCartella().getVisitaCorrente();
 
-        Farmaco f = visita.getMagazzino().selezionaFarmacoById(idFarmaco);
+        Farmaco f = animaleCorrente.selezionaFarmacoByid(idFarmaco);
         if (f == null || !f.getNome().equalsIgnoreCase(nomeFarmaco)) {
             throw new IllegalArgumentException("Farmaco non trovato o non corrispondente");
         }
 
-        visita.creaTerapia(f, posologia, frequenza, inizio, fine);
+        animaleCorrente.creaTerapia(f, posologia, frequenza, inizio, fine);
     }
 
     // Metodo helper per la ricerca farmaci (per il menu)
     public boolean cercaFarmaco(String nome) {
-        if (animaleCorrente == null || animaleCorrente.getCartella().getVisitaCorrente() == null)
+        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso())
             return false;
-        return animaleCorrente.getCartella().getVisitaCorrente().ricercaFarmaco(nome);
+        return animaleCorrente.ricercaFarmaco(nome);
     }
 
     public Farmaco getFarmacoById(int id) {
-        if (animaleCorrente == null || animaleCorrente.getCartella().getVisitaCorrente() == null)
+        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso())
             return null;
-        return animaleCorrente.getCartella().getVisitaCorrente().getMagazzino().getFarmacoByid(id);
+        return animaleCorrente.getFarmacoById(id);
     }
 
     public int aggiungiEsame(String tipoEsame, int microchip) {
@@ -146,16 +145,15 @@ public class VetCare {
         if (a == null)
             throw new IllegalArgumentException("Animale non trovato");
 
-        Visita v = a.getCartella().getVisitaCorrente();
-        if (v == null)
+        if (!a.haVisitaInCorso())
             throw new IllegalStateException("Nessuna visita attiva per questo animale");
 
-        return v.richiediEsame(tipoEsame, microchip);
+        return a.richiediEsame(tipoEsame, microchip);
     }
 
     public void confermaVisita() {
-        if (animaleCorrente != null && animaleCorrente.getCartella().getVisitaCorrente() != null) {
-            animaleCorrente.getCartella().confermaVisita();
+        if (animaleCorrente != null && animaleCorrente.haVisitaInCorso()) {
+            animaleCorrente.confermaVisita();
         } else {
             throw new IllegalStateException("Nessuna visita da confermare");
         }

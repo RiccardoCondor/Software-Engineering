@@ -53,4 +53,39 @@ public class CartellaClinica {
             this.esami.put(esame.getId(), esame);
         }
     }
+
+    public boolean haVisitaInCorso() {
+        return visitaCorrente != null;
+    }
+
+    public int richiediEsame(String tipoEsame, int microchip) {
+        if (visitaCorrente == null)
+            return -1;
+        return visitaCorrente.richiediEsame(tipoEsame, microchip);
+    }
+
+    public Terapia creaTerapia(Farmaco f, int posologia, String frequenza, java.time.LocalDate data_i,
+            java.time.LocalDate data_f) {
+        if (visitaCorrente == null)
+            return null;
+        return visitaCorrente.creaTerapia(f, posologia, frequenza, data_i, data_f);
+    }
+
+    public boolean ricercaFarmaco(String nome) {
+        if (visitaCorrente == null)
+            return false;
+        return visitaCorrente.ricercaFarmaco(nome);
+    }
+
+    public Farmaco getFarmacoById(int id) {
+        if (visitaCorrente == null)
+            return null;
+        return visitaCorrente.getFarmacoById(id);
+    }
+
+    public Farmaco selezionaFarmacoByid(int id) {
+        if (visitaCorrente == null)
+            return null;
+        return visitaCorrente.selezionaFarmacoByid(id);
+    }
 }
