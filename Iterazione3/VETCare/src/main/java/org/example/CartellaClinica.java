@@ -43,9 +43,13 @@ public class CartellaClinica {
 
     public List<Esame> risultatiEsami(int microchip) {
         List<Esame> nuoviEsami = Laboratorio.getInstance().risultatiEsame(microchip);
+        confermaEsami(nuoviEsami);
+        return nuoviEsami;
+    }
+
+    public void confermaEsami(List<Esame> nuoviEsami) {
         for (Esame esame : nuoviEsami) {
             this.esami.put(esame.getId(), esame);
         }
-        return nuoviEsami;
     }
 }
