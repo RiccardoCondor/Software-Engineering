@@ -44,9 +44,10 @@ class CartellaClinicaTest {
     void ricercaVisite() {
         CartellaClinica c = new CartellaClinica();
         c.nuovaVisita("anamnesi", "esameObbiettivo", "diagnosi");
+        Visita v = c.getVisitaCorrente();
         c.confermaVisita();
-        int id = c.getVisitaCorrente().getIdVisita();
-        assertEquals(c.getVisitaCorrente(), c.ricercaVisita(id));
+        int id = v.getIdVisita();
+        assertEquals(v, c.ricercaVisita(id));
     }
 
     @Test
@@ -69,9 +70,10 @@ class CartellaClinicaTest {
     void testRisultatiEsami() {
         CartellaClinica c = new CartellaClinica();
         c.nuovaVisita("anamnesi", "esameObbiettivo", "diagnosi");
-        c.confermaVisita();
+        Visita v = c.getVisitaCorrente();
         int microchip = 555;
-        c.getVisitaCorrente().richiediEsame("urine", microchip);
+        v.richiediEsame("urine", microchip);
+        c.confermaVisita();
 
         // Esecuzione: recupera risultati
         var risultati = c.risultatiEsami(microchip);

@@ -27,6 +27,7 @@ public class CartellaClinica {
         if (visitaCorrente == null)
             return;
         visite.put(visitaCorrente.getIdVisita(), visitaCorrente);
+        visitaCorrente = null;
     }
 
     public Visita getVisitaCorrente() {

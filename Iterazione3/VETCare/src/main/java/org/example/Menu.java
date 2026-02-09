@@ -73,49 +73,54 @@ public class Menu {
         // Dati Proprietario
         Proprietario prop = null;
         do {
+            try {
+                System.out.println("Inserisci dati Proprietario:");
+                String cfProp = leggiStringa("Codice Fiscale: ");
 
-            System.out.println("Inserisci dati Proprietario:");
-            String cfProp = leggiStringa("Codice Fiscale: ");
-            prop = controller.ricercaProprietari(cfProp);
-            if (prop != null) {
-                System.out.println("Seleziono Propietario esistente");
-                break;
-            }
-            String nomeProp = leggiStringa("Nome: ");
-            String contattoProp = leggiStringa("Contatto: ");
-
-            controller.inserisciNuovaAnagrafica(nomeProp, cfProp, contattoProp);
-            prop = controller.getProprietarioCorrente();
-            if (prop == null) {
-                System.out.println("dati errati, riprova");
+                prop = controller.ricercaProprietari(cfProp);
+                if (prop != null) {
+                    System.out.println("Seleziono Propietario esistente");
+                    // Impostiamo comunque il corrente nel controller per l'animale successivo
+                    controller.inserisciNuovaAnagrafica(prop.getNome(), prop.getCf(), prop.getContatto());
+                } else {
+                    String nomeProp = leggiStringa("Nome: ");
+                    String contattoProp = leggiStringa("Contatto: ");
+                    prop = controller.inserisciNuovaAnagrafica(nomeProp, cfProp, contattoProp);
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println("Errore: " + e.getMessage() + ". Riprova.");
             }
         } while (prop == null);
 
         // Dati Animale
         Animale animale = null;
         do {
-            System.out.println("Inserisci dati Animale:");
-            String nomeAnimale = leggiStringa("Nome: ");
-            String specie = leggiStringa("Specie: ");
-            String razza = leggiStringa("Razza: ");
-            int microchip = -111;
-            do {
-                microchip = leggiIntero("Microchip (numero intero): ");
-                if (microchip == -1)
-                    return;
+            try {
+                System.out.println("Inserisci dati Animale:");
+                int microchip = leggiIntero("Microchip (numero intero): ");
+
                 animale = controller.ricercaAnimale(microchip);
                 if (animale != null) {
                     System.out.println("animale già presente nel sistema");
-                    System.out.println("digita -1 per USCIRE dall'inserimento anagrafica O CORREGGI");
+                    String choice = leggiStringa("digita -1 per USCIRE o invio per riprovare: ");
+                    if ("-1".equals(choice))
+                        return;
+                    animale = null; // forzo loop
+                    continue;
                 }
-            } while (animale != null);
-            LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");
 
-            animale = controller.inserisciNuovoAnimale(nomeAnimale, specie, razza, microchip, dataNascita, prop);
-            if (animale == null) {
-                System.out.println("dati errati, riprova");
+                String nomeAnimale = leggiStringa("Nome: ");
+                String specie = leggiStringa("Specie: ");
+                String razza = leggiStringa("Razza: ");
+                LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");
+
+                animale = controller.inserisciNuovoAnimale(nomeAnimale, specie, razza, microchip, dataNascita,
+                        prop.getCf());
+            } catch (IllegalArgumentException e) {
+                System.out.println("Errore: " + e.getMessage() + ". Riprova.");
             }
         } while (animale == null);
+
         System.out.println("Premi 1 per confermare la registrazione, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
         if ("1".equals(conferma)) {
@@ -128,39 +133,44 @@ public class Menu {
 
     private void gestisciNuovaVisita() {
         System.out.println("\n--- Inserimento Nuova Visita ---");
-        int microchip = -111;
+
         Animale animale = null;
         do {
-            microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+            int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
             animale = controller.ricercaAnimale(microchip);
 
             if (animale == null) {
                 System.out.println("Errore: Animale con microchip " + microchip + " non trovato.");
-                int input = leggiIntero("voui registrare un nuovo animale? 1 si, altro no: ");
-                if (input == 1)
+                int input = leggiIntero("vuoi registrare un nuovo animale? 1 si, altro no: ");
+                if (input == 1) {
                     gestisciNuovaAnagrafica();
-                else
+
+                } else {
                     return;
+                }
             }
         } while (animale == null);
 
         System.out.println("Animale trovato: " + animale.getNome() + " (" + animale.getSpecie() + ")");
-        Visita visita = null;
-        do {
-            String anamnesi = leggiStringa("Anamnesi: ");
-            String esame = leggiStringa("Esame Obbiettivo: ");
-            String diagnosi = leggiStringa("Diagnosi: ");
 
-            controller.nuovaVisita(microchip, anamnesi, esame, diagnosi);
-            visita = controller.getAnimaleCorrente().getCartella().getVisitaCorrente();
-            if (visita == null) {
-                System.out.println("riempi tutti i campi");
+        boolean visitaCreata = false;
+        do {
+            try {
+                String anamnesi = leggiStringa("Anamnesi: ");
+                String esame = leggiStringa("Esame Obbiettivo: ");
+                String diagnosi = leggiStringa("Diagnosi: ");
+
+                controller.nuovaVisita(animale.getMicrochip(), anamnesi, esame, diagnosi);
+                visitaCreata = true;
+
+                aggiungiTerapia();
+                aggiungiEsame(animale.getMicrochip());
+
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                System.out.println("Errore: " + e.getMessage() + ". Riprova.");
             }
-            // accedi al magazzino per aggiungere farmaci
-            aggiungiTerapia(visita);
-            // accedi al laboratorio per aggiungere esami
-            aggiungiEsame(visita, microchip);
-        } while (visita == null);
+        } while (!visitaCreata);
+
         System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
         String conferma = scanner.nextLine();
         if ("1".equals(conferma)) {
@@ -171,7 +181,7 @@ public class Menu {
         }
     }
 
-    private void aggiungiTerapia(Visita visita) {
+    private void aggiungiTerapia() {
         int scelta = leggiIntero("vuoi aggiungere una Terapia? (1 per sì, altro per no): ");
         if (scelta != 1) {
             System.out.println("Terapia non aggiunta");
@@ -187,7 +197,7 @@ public class Menu {
                 return;
             }
 
-            if (visita.ricercaFarmaco(nomeFarmaco)) {
+            if (controller.cercaFarmaco(nomeFarmaco)) {
                 boolean selectionDone = false;
                 while (!selectionDone) {
 
@@ -195,21 +205,24 @@ public class Menu {
                     if (idFarmaco == -1) {
                         selectionDone = true;
                     } else {
-                        Farmaco farmaco = null;
-                        farmaco = visita.getMagazzino().getFarmacoByid(idFarmaco);
+                        Farmaco farmaco = controller.getFarmacoById(idFarmaco);
                         if (farmaco == null || !farmaco.getNome().equalsIgnoreCase(nomeFarmaco)) {
                             System.out.println("Farmaco trovato non coincide con il nome inserito.");
                         } else {
+                            // Trovato e valido
+                            target = farmaco;
                             selectionDone = true;
                             find = true;
-                            target = visita.selezionaFarmacoById(idFarmaco);
                         }
 
                     }
                 }
+            } else {
+                System.out.println("Farmaco non trovato.");
             }
         }
 
+        // Input parametri terapia
         int posologia = 0;
         do {
             posologia = leggiIntero("Posologia (mg) [>0]: ");
@@ -237,11 +250,15 @@ public class Menu {
             }
         }
 
-        visita.creaTerapia(target, posologia, frequenza, dataInizio, dataFine);
-        System.out.println("Terapia aggiunta con successo!");
+        try {
+            controller.aggiungiTerapia(target.getNome(), target.getId(), posologia, frequenza, dataInizio, dataFine);
+            System.out.println("Terapia aggiunta con successo!");
+        } catch (Exception e) {
+            System.out.println("Errore creazione terapia: " + e.getMessage());
+        }
     }
 
-    private void aggiungiEsame(Visita visita, int microchip) {
+    private void aggiungiEsame(int microchip) {
         int scelta = leggiIntero("vuoi aggiungere un Esame? (1 per sì, altro per no): ");
         if (scelta != 1) {
             System.out.println("Esame non aggiunto");
@@ -256,12 +273,16 @@ public class Menu {
                 return;
             }
 
-            int idEsame = visita.richiediEsame(tipoEsame, microchip);
-            if (idEsame > 0) {
-                System.out.println("Esame aggiunto con successo! ID Esame: " + idEsame);
-                done = true;
-            } else {
-                System.out.println("Errore nell'aggiunta dell'esame. Riprova (forse tipo non valido?).");
+            try {
+                int id = controller.aggiungiEsame(tipoEsame, microchip);
+                if (id > 0) {
+                    System.out.println("Esame aggiunto con successo! ID Esame: " + id);
+                    done = true;
+                } else {
+                    System.out.println("Errore nell'aggiunta dell'esame. Riprova (forse tipo non valido?).");
+                }
+            } catch (Exception e) {
+                System.out.println("Errore: " + e.getMessage() + ". Riprova.");
             }
         }
     }
@@ -310,8 +331,14 @@ public class Menu {
     private void richiediEsami() {
         System.out.println("\n--- Richiedi e Salva Esami ---");
         int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
-        Animale animale = controller.ricercaAnimale(microchip);
 
+        // Qui la logica "Richiedi e Salva" nel menu accedeva a cartella.risultatiEsami
+        // Questa logica sembrava solo visualizzare esami esistenti o processare
+        // risultati?
+        // Il nome "richiediEsami" nel menu originale stampava "Trovati e salvati...".
+        // Sembra più una visualizzazione referti.
+
+        Animale animale = controller.ricercaAnimale(microchip);
         if (animale == null) {
             System.out.println("Errore: Animale non trovato.");
             return;
@@ -343,7 +370,6 @@ public class Menu {
         while (true) {
             try {
                 System.out.print(prompt);
-                // Leggiamo la linea e parsiamo per evitare problemi col buffer
                 String input = scanner.nextLine();
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
@@ -367,44 +393,28 @@ public class Menu {
     private void flussoAggiungiAppuntamento() {
         try {
             System.out.println("\n--- Aggiungi Appuntamento ---");
-            Animale animale = null;
-            do{
             int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
-
-            animale = controller.ricercaAnimale(microchip);
-
-            if (animale == null) {
+            // Check preventivo
+            if (controller.ricercaAnimale(microchip) == null) {
                 System.out.println("Errore: Animale non trovato. Registrare prima l'animale.");
                 return;
             }
-            }while(animale == null);
 
-            String titolo;
-            do {
-                System.out.print("Titolo: ");
-                titolo = scanner.nextLine();
-                if (titolo.trim().isEmpty()) {
-                    System.out.println("Il titolo non può essere vuoto. Riprova.");
-                }
-            } while (titolo.trim().isEmpty());
-            System.out.print("Descrizione: ");
-            String descrizione = scanner.nextLine();
+            String titolo = leggiStringa("Titolo: ");
+            String descrizione = leggiStringa("Descrizione: ");
 
-            // Ciclo finché non viene fornito uno slot orario valido
+            // Ciclo orario
             while (true) {
-                // Input semplificato: Richiedi Ora (08-17) solo per imporre vincoli interi
                 LocalDateTime inizio = ottieniDataOraValida("Inizio");
-
-                // Per l'orario di fine, richiedi durata in ore
                 LocalDateTime fine = ottieniDataOraFineValida(inizio);
 
                 try {
-                    controller.getCalendario().aggiungiAppuntamento(animale, titolo, descrizione, inizio, fine);
+                    controller.aggiungiAppuntamento(microchip, titolo, descrizione, inizio, fine);
                     System.out.println("Appuntamento aggiunto con successo!");
-                    break; // Esci dal ciclo in caso di successo
+                    break;
                 } catch (IllegalArgumentException | SovrapposizioneAppuntamentoException e) {
-                    System.out.println("Errore nell'aggiunta dell'appuntamento: " + e.getMessage());
-                    System.out.println("Per favore, riprova a inserire l'orario.");
+                    System.out.println("Errore: " + e.getMessage());
+                    System.out.println("Riprova inserimento orario.");
                 }
             }
 
@@ -423,7 +433,6 @@ public class Menu {
                     continue;
 
                 int giorno = Integer.parseInt(inputGiorno);
-
                 LocalDate data;
                 if (giorno < oggi.getDayOfMonth()) {
                     data = oggi.plusMonths(1).withDayOfMonth(giorno);
@@ -433,12 +442,8 @@ public class Menu {
 
                 System.out.printf("Ora %s (08-17): ", etichetta);
                 int ora = Integer.parseInt(scanner.nextLine());
-
-                // Imponi minuti = 00
                 return LocalDateTime.of(data, LocalTime.of(ora, 0));
 
-            } catch (NumberFormatException | DateTimeParseException e) {
-                System.out.println("Formato numero non valido. Riprova.");
             } catch (Exception e) {
                 System.out.println("Input non valido: " + e.getMessage());
             }
@@ -450,15 +455,13 @@ public class Menu {
             try {
                 System.out.print("Durata (ore): ");
                 int durata = Integer.parseInt(scanner.nextLine());
-
                 if (durata <= 0) {
-                    System.out.println("La durata deve essere positiva.");
+                    System.out.println("Durata positiva richiesta.");
                     continue;
                 }
-
                 return inizio.plusHours(durata);
             } catch (NumberFormatException e) {
-                System.out.println("Numero non valido. Inserisci ore intere.");
+                System.out.println("Numero non valido.");
             }
         }
     }
