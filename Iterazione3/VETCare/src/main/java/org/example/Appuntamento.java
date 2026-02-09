@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * Rappresenta un appuntamento immutabile nel calendario.
  */
-public final class Appuntamento implements Comparable<Appuntamento> {
+public class Appuntamento implements Comparable<Appuntamento> {
     private final String titolo;
     private final String descrizione;
     private final LocalDateTime inizio;
