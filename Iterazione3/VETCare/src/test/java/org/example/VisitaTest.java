@@ -78,16 +78,16 @@ class VisitaTest {
 
         // Assumiamo che ID 2 esista (Tachipirina)
         // Caso 1: ID valido di un farmaco non scaduto o non terminato
-        Farmaco f = visita.selezionaFarmacoById(2);
+        Farmaco f = visita.selezionaFarmacoByid(2);
         assertNotNull(f);
         assertEquals(2, f.getId());
 
         // Caso 2: ID non esistente
-        assertNull(visita.selezionaFarmacoById(9999));
+        assertNull(visita.selezionaFarmacoByid(9999));
 
         // Caso 3: ID <= 0
-        assertNull(visita.selezionaFarmacoById(0));
-        assertNull(visita.selezionaFarmacoById(-1));
+        assertNull(visita.selezionaFarmacoByid(0));
+        assertNull(visita.selezionaFarmacoByid(-1));
     }
 
     // Classi di equivalenza per stampaTerapia:
