@@ -1,16 +1,16 @@
 package org.example;
 
 public class MembroEquipe {
-    private int id;
+    private int idmembro;
     private String nome;
-    public MembroEquipe(int id, String nome){
-        this.id = id;
+    public MembroEquipe(int idmembro, String nome){
+        this.idmembro = idmembro;
         this.nome = nome;
 
     }
 
-    public int getId() {
-        return id;
+    public int getIdmembro() {
+        return idmembro;
     }
 
     public String getNome() {
@@ -19,6 +19,6 @@ public class MembroEquipe {
 
     @Override
     public String toString() {
-        return "Membro equipe: "+nome+" | ID: "+id;
+        return "Membro equipe: "+nome+" | ID: "+idmembro;
     }
 }
