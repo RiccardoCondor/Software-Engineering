@@ -55,6 +55,7 @@ public class Visita {
                 || data_i.isAfter(data_f)) {
             return null;
         }
+        magazzino.selezionaFarmacoById(f.getId());
         this.terapia = new Terapia();
         terapia.setFarmaco(f);
         terapia.setPosologia(posologia);
