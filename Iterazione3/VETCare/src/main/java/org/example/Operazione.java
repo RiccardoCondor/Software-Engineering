@@ -27,13 +27,17 @@ public class Operazione extends Appuntamento {
 
     @Override
     public String toString() {
-        String vet = "{ \n";
-        for (MembroEquipe m : membri.values()) {
-            vet = vet + m.toString() + ",\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Operazione{tipo operazione: ").append(tipoOperazione).append(", membri: [");
+
+        java.util.Iterator<MembroEquipe> it = membri.values().iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().toString());
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
         }
-        return "Operazione{" +
-                "tipo operazione: " + tipoOperazione +
-                vet
-                + '}';
+        sb.append("]}");
+        return sb.toString();
     }
 }

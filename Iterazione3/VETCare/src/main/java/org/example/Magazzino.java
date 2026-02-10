@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.exceptions.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,51 +26,37 @@ public class Magazzino {
     }
 
     public boolean ricercaFarmaci(String nomeFarmaco) {
-        if (nomeFarmaco == null || nomeFarmaco.trim().isEmpty()) {
-            System.out.println("Inserisci un nome valido per il farmaco.");
-            return false;
-        }
-        System.out.println("Risultati ricerca per: " + nomeFarmaco);
         boolean trovato = false;
         for (Farmaco f : farmaci.values()) {
             if (f.getNome().equalsIgnoreCase(nomeFarmaco)) {
-                System.out.println("ID: " + f.getId() +
-                        ", Nome: " + f.getNome() +
-                        ", Quantità: " + f.getQuantita() +
-                        ", Scadenza: " + f.getScadenza());
+                System.out.println(f.getId() + " " + f.getNome() + " " + f.getQuantita() + " " + f.getScadenza());
                 trovato = true;
             }
-        }
-        if (!trovato) {
-            System.out.println("Nessun farmaco trovato con il nome: " + nomeFarmaco);
         }
         return trovato;
     }
 
     public Farmaco selezionaFarmacoById(int id) {
         Farmaco farmaco = getFarmacoByid(id);
-        if(farmaco != null){
-        int q = farmaco.getQuantita();
-        farmaco.setQuantita(--q);
+        if (farmaco != null) {
+            int q = farmaco.getQuantita();
+            farmaco.setQuantita(--q);
         }
         return farmaco;
     }
 
     public Farmaco getFarmacoByid(int id) {
         if (id <= 0 || !farmaci.containsKey(id)) {
-            System.out.println("ID non valido o farmaco non trovato.");
-            return null;
+            throw new EntitaNonTrovataException("Farmaco non trovato per ID: " + id);
         }
-        if (farmaci.get(id).getScadenza().isBefore(LocalDate.now())) {
-            System.out.println("Farmaco Scaduto.");
-            return null;
+        Farmaco f = farmaci.get(id);
+        if (f.getScadenza().isBefore(LocalDate.now())) {
+            throw new FarmacoScadutoException("Il farmaco " + f.getNome() + " è scaduto il " + f.getScadenza());
         }
-        int q = farmaci.get(id).getQuantita();
-        if (q == 0) {
-            System.out.println("scorte esaurite!");
-            return null;
+        if (f.getQuantita() == 0) {
+            throw new FarmacoNonDisponibileException("Scorte esaurite per il farmaco " + f.getNome());
         }
-        return farmaci.get(id);
+        return f;
     }
 
     private void inserimentoFarmaciAutomatico() {

@@ -30,12 +30,8 @@ public class Laboratorio {
         return esamiPassati;
     }
 
-    public void aggiungiEsame(Esame esame) {
+    private void aggiungiEsame(Esame esame) {
         esamiMap.put(esame.getId(), esame);
-    }
-
-    public void aggiungiEsamePassato(Esame esame) {
-        esamiPassati.put(esame.getId(), esame);
     }
 
     public Esame getEsame(int id) {
@@ -45,28 +41,34 @@ public class Laboratorio {
     private int ctr = 0;
 
     public int produciesame(String tipo, int microchip) {
+        if (tipo == null)
+            return -1;
+
         int id = ++ctr;
         java.time.LocalDate now = java.time.LocalDate.now();
         Esame esame = null;
-        if(tipo == null)return -1;
-        if (tipo.equalsIgnoreCase("urine")) {
-            esame = new EsameUrine(now, id, "Valori urine: " + (int) (Math.random() * 100), microchip);
-        } else if (tipo.equalsIgnoreCase("sangue")) {
-            esame = new EsameSangue(now, id, "Valori sangue: " + (int) (Math.random() * 100), microchip);
-        } else if (tipo.equalsIgnoreCase("completo")) {
-            EsameCompleto completo = new EsameCompleto(now, id, "Profilo completo", microchip);
-            completo.aggiungiEsame(
-                    new EsameUrine(now, ++ctr, "Valori urine: " + (int) (Math.random() * 100), microchip));
-            completo.aggiungiEsame(
-                    new EsameSangue(now, ++ctr, "Valori sangue: " + (int) (Math.random() * 100), microchip));
-            esame = completo;
+
+        switch (tipo.toLowerCase()) {
+            case "urine":
+                esame = new EsameUrine(now, id, "Valori urine: " + (int) (Math.random() * 100), microchip);
+                break;
+            case "sangue":
+                esame = new EsameSangue(now, id, "Valori sangue: " + (int) (Math.random() * 100), microchip);
+                break;
+            case "completo":
+                EsameCompleto completo = new EsameCompleto(now, id, "Profilo completo", microchip);
+                completo.aggiungiEsame(
+                        new EsameUrine(now, ++ctr, "Valori urine: " + (int) (Math.random() * 100), microchip));
+                completo.aggiungiEsame(
+                        new EsameSangue(now, ++ctr, "Valori sangue: " + (int) (Math.random() * 100), microchip));
+                esame = completo;
+                break;
+            default:
+                return -1;
         }
 
-        if (esame != null) {
-            esamiMap.put(id, esame);
-            return id;
-        }
-        return -1;
+        aggiungiEsame(esame);
+        return id;
     }
 
     public List<Esame> risultatiEsame(int microchip) {

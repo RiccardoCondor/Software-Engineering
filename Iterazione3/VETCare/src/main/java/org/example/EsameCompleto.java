@@ -16,10 +16,6 @@ public class EsameCompleto extends Esame {
         componenti.add(esame);
     }
 
-    public void rimuoviEsame(Esame esame) {
-        componenti.remove(esame);
-    }
-
     public List<Esame> getComponenti() {
         return componenti;
     }

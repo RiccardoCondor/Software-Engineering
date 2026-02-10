@@ -1,13 +1,11 @@
 package org.example;
 
+import org.example.exceptions.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 public class VetCare {
@@ -18,7 +16,8 @@ public class VetCare {
     private Map<Integer, MembroEquipe> membri;
     private Calendario calendario;
     private static VetCare instance;
-    private Scanner scanner;
+    private ConsoleUI ui;
+    private Magazzino magazzino;
 
     public static VetCare getInstance() {
         if (instance == null) {
@@ -34,7 +33,8 @@ public class VetCare {
         proprietarioCorrente = null;
         animaleCorrente = null;
         this.calendario = new Calendario();
-        this.scanner = new Scanner(System.in);
+        this.ui = new ConsoleUI();
+        this.magazzino = Magazzino.getInstance();
 
         membri.put(1, new Anestetista(1, "Dr. Rossi"));
         membri.put(2, new Infermiere(2, "Inf. Bianchi"));
@@ -74,7 +74,7 @@ public class VetCare {
             throw new IllegalArgumentException("Dati proprietario incompleti.");
         }
         if (proprietari.containsKey(cf)) {
-            System.out.println("Proprietario esistente.");
+            ui.mostraMessaggio("Proprietario esistente.");
             proprietarioCorrente = proprietari.get(cf);
             return proprietarioCorrente; // Ritorna esistente se trovato
         }
@@ -122,34 +122,38 @@ public class VetCare {
                 || esameObiettivo.isEmpty() || diagnosi.isEmpty()) {
             throw new IllegalArgumentException("Dati visita incompleti");
         }
-        animaleCorrente.nuovaVisita(anamnesi, esameObiettivo, diagnosi);
+        animaleCorrente.getCartella().nuovaVisita(anamnesi, esameObiettivo, diagnosi);
     }
 
     public void aggiungiTerapia(String nomeFarmaco, int idFarmaco, int posologia, String frequenza, LocalDate inizio,
             LocalDate fine) {
-        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso()) {
+        if (animaleCorrente == null || !animaleCorrente.getCartella().haVisitaInCorso()) {
             throw new IllegalStateException("Nessuna visita in corso per aggiungere terapia");
         }
 
-        Farmaco f = animaleCorrente.getFarmacoById(idFarmaco);
+        // Refactoring: Access Magazzino directly
+        Farmaco f = this.magazzino.selezionaFarmacoById(idFarmaco);
         if (f == null || !f.getNome().equalsIgnoreCase(nomeFarmaco)) {
             throw new IllegalArgumentException("Farmaco non trovato o non corrispondente");
         }
 
-        animaleCorrente.creaTerapia(f, posologia, frequenza, inizio, fine);
+        // Refactoring: Access Visita directly
+        Visita visita = animaleCorrente.getCartella().getVisitaCorrente();
+        if (visita != null) {
+            visita.creaTerapia(f, posologia, frequenza, inizio, fine);
+        }
     }
 
     // Metodo helper per la ricerca farmaci (per il menu)
     public boolean cercaFarmaco(String nome) {
-        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso())
-            return false;
-        return animaleCorrente.ricercaFarmaco(nome);
+        // Refactoring: Access Magazzino directly, no need for active animal/visit for
+        // lookup
+        return this.magazzino.ricercaFarmaci(nome);
     }
 
     public Farmaco getFarmacoById(int id) {
-        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso())
-            return null;
-        return animaleCorrente.getFarmacoById(id);
+        // Refactoring: Access Magazzino directly
+        return this.magazzino.getFarmacoByid(id);
     }
 
     public int aggiungiEsame(String tipoEsame, int microchip) {
@@ -158,15 +162,20 @@ public class VetCare {
         if (a == null)
             throw new IllegalArgumentException("Animale non trovato");
 
-        if (!a.haVisitaInCorso())
+        if (!a.getCartella().haVisitaInCorso())
             throw new IllegalStateException("Nessuna visita attiva per questo animale");
 
-        return a.richiediEsame(tipoEsame, microchip);
+        // Refactoring: Access Visita directly
+        Visita visita = a.getCartella().getVisitaCorrente();
+        if (visita != null) {
+            return visita.richiediEsame(tipoEsame, microchip);
+        }
+        return -1;
     }
 
     public void confermaVisita() {
-        if (animaleCorrente != null && animaleCorrente.haVisitaInCorso()) {
-            animaleCorrente.confermaVisita();
+        if (animaleCorrente != null && animaleCorrente.getCartella().haVisitaInCorso()) {
+            animaleCorrente.getCartella().confermaVisita();
         } else {
             throw new IllegalStateException("Nessuna visita da confermare");
         }
@@ -227,55 +236,61 @@ public class VetCare {
     public void start() {
         boolean running = true;
         while (running) {
-            System.out.println("\n--- VETCare Menu ---");
-            System.out.println("1. Aggiungi Paziente e Proprietario");
-            System.out.println("2. Aggiungi Visita");
-            System.out.println("3. Visualizza Animali e Proprietari");
-            System.out.println("4. Visualizza Visite di un Animale");
-            System.out.println("5. Richiedi esami per salvarli nella cartella clinica di un animale");
-            System.out.println("6. Visualizza calendario settimanale");
-            System.out.println("7. Visualizza agenda 30 giorni");
-            System.out.println("8. Aggiungi appuntamento");
-            System.out.println("9. Aggiungi Operazione");
-            System.out.println("0. Esci");
-            System.out.print("Seleziona un'opzione: ");
+            ui.mostraMessaggio("\n--- VETCare Menu ---");
+            ui.mostraMessaggio("1. Aggiungi Paziente e Proprietario");
+            ui.mostraMessaggio("2. Aggiungi Visita");
+            ui.mostraMessaggio("3. Visualizza Animali e Proprietari");
+            ui.mostraMessaggio("4. Visualizza Visite di un Animale");
+            ui.mostraMessaggio("5. Richiedi esami per salvarli nella cartella clinica di un animale");
+            ui.mostraMessaggio("6. Visualizza calendario settimanale");
+            ui.mostraMessaggio("7. Visualizza agenda 30 giorni");
+            ui.mostraMessaggio("8. Aggiungi appuntamento");
+            ui.mostraMessaggio("9. Aggiungi Operazione");
+            ui.mostraMessaggio("0. Esci");
 
-            String input = scanner.nextLine();
+            String input = ui.leggiStringa("Seleziona un'opzione: ");
 
-            switch (input) {
-                case "1":
-                    gestisciNuovaAnagrafica();
-                    break;
-                case "2":
-                    gestisciNuovaVisita();
-                    break;
-                case "3":
-                    visualizzaAnimali();
-                    break;
-                case "4":
-                    visualizzaVisiteAnimale();
-                    break;
-                case "5":
-                    richiediEsami();
-                    break;
-                case "6":
-                    this.getCalendario().stampaCalendarioGriglia();
-                    break;
-                case "7":
-                    this.getCalendario().stampaAgenda();
-                    break;
-                case "8":
-                    flussoAggiungiAppuntamento();
-                    break;
-                case "9":
-                    flussoAggiungiOperazione();
-                    break;
-                case "0":
-                    running = false;
-                    System.out.println("Uscita...");
-                    break;
-                default:
-                    System.out.println("Opzione non valida. Riprova.");
+            try {
+                switch (input) {
+                    case "1":
+                        gestisciNuovaAnagrafica();
+                        break;
+                    case "2":
+                        gestisciNuovaVisita();
+                        break;
+                    case "3":
+                        visualizzaAnimali();
+                        break;
+                    case "4":
+                        visualizzaVisiteAnimale();
+                        break;
+                    case "5":
+                        richiediEsami();
+                        break;
+                    case "6":
+                        this.getCalendario().stampaCalendarioGriglia();
+                        break;
+                    case "7":
+                        this.getCalendario().stampaAgenda();
+                        break;
+                    case "8":
+                        flussoAggiungiAppuntamento();
+                        break;
+                    case "9":
+                        flussoAggiungiOperazione();
+                        break;
+                    case "0":
+                        running = false;
+                        ui.mostraMessaggio("Uscita...");
+                        break;
+                    default:
+                        ui.mostraErrore("Opzione non valida. Riprova.");
+                }
+            } catch (Exception e) {
+                ui.mostraErrore("Si è verificato un errore imprevisto: " + e.getMessage());
+                e.printStackTrace();
+                ui.mostraMessaggio("Premi Invio per continuare...");
+                ui.leggiStringa("");
             }
         }
     }
@@ -288,7 +303,7 @@ public class VetCare {
         do {
             try {
                 System.out.println("Inserisci dati Proprietario:");
-                String cfProp = leggiStringa("Codice Fiscale: ");
+                String cfProp = ui.leggiStringa("Codice Fiscale: ");
 
                 prop = this.ricercaProprietari(cfProp);
                 if (prop != null) {
@@ -296,8 +311,8 @@ public class VetCare {
                     // Impostiamo comunque il corrente nel controller per l'animale successivo
                     this.inserisciNuovaAnagrafica(prop.getNome(), prop.getCf(), prop.getContatto());
                 } else {
-                    String nomeProp = leggiStringa("Nome: ");
-                    String contattoProp = leggiStringa("Contatto: ");
+                    String nomeProp = ui.leggiStringa("Nome: ");
+                    String contattoProp = ui.leggiStringa("Contatto: ");
                     prop = this.inserisciNuovaAnagrafica(nomeProp, cfProp, contattoProp);
                 }
             } catch (IllegalArgumentException e) {
@@ -310,22 +325,22 @@ public class VetCare {
         do {
             try {
                 System.out.println("Inserisci dati Animale:");
-                int microchip = leggiIntero("Microchip (numero intero): ");
+                int microchip = ui.leggiIntero("Microchip (numero intero): ");
 
                 animale = this.ricercaAnimale(microchip);
                 if (animale != null) {
                     System.out.println("animale già presente nel sistema");
-                    String choice = leggiStringa("digita -1 per USCIRE o invio per riprovare: ");
+                    String choice = ui.leggiStringa("digita -1 per USCIRE o invio per riprovare: ");
                     if ("-1".equals(choice))
                         return;
                     animale = null; // forzo loop
                     continue;
                 }
 
-                String nomeAnimale = leggiStringa("Nome: ");
-                String specie = leggiStringa("Specie: ");
-                String razza = leggiStringa("Razza: ");
-                LocalDate dataNascita = leggiData("Data di Nascita (YYYY-MM-DD): ");
+                String nomeAnimale = ui.leggiStringa("Nome: ");
+                String specie = ui.leggiStringa("Specie: ");
+                String razza = ui.leggiStringa("Razza: ");
+                LocalDate dataNascita = ui.leggiData("Data di Nascita (YYYY-MM-DD): ");
 
                 animale = this.inserisciNuovoAnimale(nomeAnimale, specie, razza, microchip, dataNascita,
                         prop.getCf());
@@ -335,7 +350,7 @@ public class VetCare {
         } while (animale == null);
 
         System.out.println("Premi 1 per confermare la registrazione, qualsiasi altro tasto per annullare:");
-        String conferma = scanner.nextLine();
+        String conferma = ui.leggiStringa("");
         if ("1".equals(conferma)) {
             this.confermaRegistrazione();
             System.out.println("Registrazione completata con successo!");
@@ -349,12 +364,12 @@ public class VetCare {
 
         Animale animale = null;
         do {
-            int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+            int microchip = ui.leggiIntero("Inserisci Microchip dell'animale: ");
             animale = this.ricercaAnimale(microchip);
 
             if (animale == null) {
                 System.out.println("Errore: Animale con microchip " + microchip + " non trovato.");
-                int input = leggiIntero("vuoi registrare un nuovo animale? 1 si, altro no: ");
+                int input = ui.leggiIntero("vuoi registrare un nuovo animale? 1 si, altro no: ");
                 if (input == 1) {
                     gestisciNuovaAnagrafica();
 
@@ -369,9 +384,9 @@ public class VetCare {
         boolean visitaCreata = false;
         do {
             try {
-                String anamnesi = leggiStringa("Anamnesi: ");
-                String esame = leggiStringa("Esame Obbiettivo: ");
-                String diagnosi = leggiStringa("Diagnosi: ");
+                String anamnesi = ui.leggiStringa("Anamnesi: ");
+                String esame = ui.leggiStringa("Esame Obbiettivo: ");
+                String diagnosi = ui.leggiStringa("Diagnosi: ");
 
                 this.nuovaVisita(animale.getMicrochip(), anamnesi, esame, diagnosi);
                 visitaCreata = true;
@@ -385,7 +400,7 @@ public class VetCare {
         } while (!visitaCreata);
 
         System.out.println("Premi 1 per confermare la Visita, qualsiasi altro tasto per annullare:");
-        String conferma = scanner.nextLine();
+        String conferma = ui.leggiStringa("");
         if ("1".equals(conferma)) {
             this.confermaVisita();
             System.out.println("Visita completata con successo!");
@@ -395,7 +410,7 @@ public class VetCare {
     }
 
     private void gestisciInputTerapia() {
-        int scelta = leggiIntero("vuoi aggiungere una Terapia? (1 per sì, altro per no): ");
+        int scelta = ui.leggiIntero("vuoi aggiungere una Terapia? (1 per sì, altro per no): ");
         if (scelta != 1) {
             System.out.println("Terapia non aggiunta");
             return;
@@ -404,7 +419,7 @@ public class VetCare {
         boolean find = false;
         Farmaco target = null;
         while (!find) {
-            String nomeFarmaco = leggiStringa("Nome del Farmaco (o 'esci' per annullare): ");
+            String nomeFarmaco = ui.leggiStringa("Nome del Farmaco (o 'esci' per annullare): ");
             if (nomeFarmaco.equalsIgnoreCase("esci")) {
                 System.out.println("Operazione annullata.");
                 return;
@@ -413,22 +428,24 @@ public class VetCare {
             if (this.cercaFarmaco(nomeFarmaco)) {
                 boolean selectionDone = false;
                 while (!selectionDone) {
-
-                    int idFarmaco = leggiIntero("Id del Farmaco (-1 per cercare altro nome): ");
+                    int idFarmaco = ui.leggiIntero("Id del Farmaco (-1 per cercare altro nome): ");
                     if (idFarmaco == -1) {
                         selectionDone = true;
                     } else {
-                        Farmaco farmaco = this.getFarmacoById(idFarmaco);
-                        if (!(farmaco == null || !farmaco.getNome().equalsIgnoreCase(nomeFarmaco)))
-                        {
-                            // Trovato e valido
-                            target = farmaco;
-                            selectionDone = true;
-                            find = true;
-                        }
-                        else
-                        {
-                            System.out.println("Farmaco non valido.");
+                        try {
+                            Farmaco farmaco = this.getFarmacoById(idFarmaco);
+                            if (farmaco != null && farmaco.getNome().equalsIgnoreCase(nomeFarmaco)) {
+                                target = farmaco;
+                                selectionDone = true;
+                                find = true;
+                            } else {
+                                System.out.println("Farmaco non valido o nome non corrispondente.");
+                            }
+                        } catch (EntitaNonTrovataException | FarmacoScadutoException
+                                | FarmacoNonDisponibileException e) {
+                            System.out.println("Errore: " + e.getMessage());
+                        } catch (Exception e) {
+                            System.out.println("Errore imprevisto nella selezione del farmaco: " + e.getMessage());
                         }
                     }
                 }
@@ -440,24 +457,25 @@ public class VetCare {
         // Input parametri terapia
         int posologia = 0;
         do {
-            posologia = leggiIntero("Posologia (mg) [>0]: ");
+            posologia = ui.leggiIntero("Posologia (mg) [>0]: ");
             if (posologia <= 0)
                 System.out.println("Inserire un valore positivo.");
         } while (posologia <= 0);
 
         String frequenza = "";
         do {
-            frequenza = leggiStringa("Frequenza (es: ogni 8 ore): ");
+            frequenza = ui.leggiStringa("Frequenza (es: ogni 8 ore): ");
             if (frequenza == null || frequenza.trim().isEmpty())
                 System.out.println("Inserire una frequenza valida.");
         } while (frequenza == null || frequenza.trim().isEmpty());
 
         LocalDate dataInizio = null;
         LocalDate dataFine = null;
+
         boolean dateValide = false;
         while (!dateValide) {
-            dataInizio = leggiData("Data Inizio (YYYY-MM-DD): ");
-            dataFine = leggiData("Data Fine (YYYY-MM-DD): ");
+            dataInizio = ui.leggiData("Data Inizio (YYYY-MM-DD): ");
+            dataFine = ui.leggiData("Data Fine (YYYY-MM-DD): ");
             if (!dataFine.isBefore(dataInizio)) {
                 dateValide = true;
             } else {
@@ -474,7 +492,7 @@ public class VetCare {
     }
 
     private void gestisciInputEsame(int microchip) {
-        int scelta = leggiIntero("vuoi aggiungere un Esame? (1 per sì, altro per no): ");
+        int scelta = ui.leggiIntero("vuoi aggiungere un Esame? (1 per sì, altro per no): ");
         if (scelta != 1) {
             System.out.println("Esame non aggiunto");
             return;
@@ -482,7 +500,7 @@ public class VetCare {
 
         boolean done = false;
         while (!done) {
-            String tipoEsame = leggiStringa("Tipo Esame (urine, sangue, completo) o 'esci' per annullare: ");
+            String tipoEsame = ui.leggiStringa("Tipo Esame (urine, sangue, completo) o 'esci' per annullare: ");
             if (tipoEsame.equalsIgnoreCase("esci")) {
                 System.out.println("Operazione annullata.");
                 return;
@@ -515,7 +533,7 @@ public class VetCare {
 
     private void visualizzaVisiteAnimale() {
         System.out.println("\n--- Visualizza Visite Animale ---");
-        int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+        int microchip = ui.leggiIntero("Inserisci Microchip dell'animale: ");
         Animale animale = this.ricercaAnimale(microchip);
 
         if (animale == null) {
@@ -545,7 +563,7 @@ public class VetCare {
 
     private void richiediEsami() {
         System.out.println("\n--- Richiedi e Salva Esami ---");
-        int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+        int microchip = ui.leggiIntero("Inserisci Microchip dell'animale: ");
 
         Animale animale = this.ricercaAnimale(microchip);
         if (animale == null) {
@@ -570,52 +588,23 @@ public class VetCare {
         }
     }
 
-    private String leggiStringa(String prompt) {
-        System.out.print(prompt);
-        return scanner.nextLine();
-    }
-
-    private int leggiIntero(String prompt) {
-        while (true) {
-            try {
-                System.out.print(prompt);
-                String input = scanner.nextLine();
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Errore: Inserisci un numero intero valido.");
-            }
-        }
-    }
-
-    private LocalDate leggiData(String prompt) {
-        while (true) {
-            try {
-                System.out.print(prompt);
-                String input = scanner.nextLine();
-                return LocalDate.parse(input);
-            } catch (DateTimeParseException e) {
-                System.out.println("Errore: Formato data non valido. Usa YYYY-MM-DD.");
-            }
-        }
-    }
-
     private void flussoAggiungiAppuntamento() {
         try {
             System.out.println("\n--- Aggiungi Appuntamento ---");
-            int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+            int microchip = ui.leggiIntero("Inserisci Microchip dell'animale: ");
             // Check preventivo
             if (this.ricercaAnimale(microchip) == null) {
                 System.out.println("Errore: Animale non trovato. Registrare prima l'animale.");
                 return;
             }
 
-            String titolo = leggiStringa("Titolo: ");
-            String descrizione = leggiStringa("Descrizione: ");
+            String titolo = ui.leggiStringa("Titolo: ");
+            String descrizione = ui.leggiStringa("Descrizione: ");
 
             // Ciclo orario
             while (true) {
-                LocalDateTime inizio = ottieniDataOraValida("Inizio");
-                LocalDateTime fine = ottieniDataOraFineValida(inizio);
+                LocalDateTime inizio = ui.ottieniDataOraValida("Inizio");
+                LocalDateTime fine = ui.ottieniDataOraFineValida(inizio);
 
                 try {
                     this.aggiungiAppuntamento(microchip, titolo, descrizione, inizio, fine);
@@ -632,69 +621,26 @@ public class VetCare {
         }
     }
 
-    private LocalDateTime ottieniDataOraValida(String etichetta) {
-        LocalDate oggi = LocalDate.now();
-        while (true) {
-            try {
-                System.out.printf("Data %s (giorno del mese): ", etichetta);
-                String inputGiorno = scanner.nextLine();
-                if (inputGiorno.trim().isEmpty())
-                    continue;
-
-                int giorno = Integer.parseInt(inputGiorno);
-                LocalDate data;
-                if (giorno < oggi.getDayOfMonth()) {
-                    data = oggi.plusMonths(1).withDayOfMonth(giorno);
-                } else {
-                    data = oggi.withDayOfMonth(giorno);
-                }
-
-                System.out.printf("Ora %s (08-17): ", etichetta);
-                int ora = Integer.parseInt(scanner.nextLine());
-                return LocalDateTime.of(data, LocalTime.of(ora, 0));
-
-            } catch (Exception e) {
-                System.out.println("Input non valido: " + e.getMessage());
-            }
-        }
-    }
-
-    private LocalDateTime ottieniDataOraFineValida(LocalDateTime inizio) {
-        while (true) {
-            try {
-                System.out.print("Durata (ore): ");
-                int durata = Integer.parseInt(scanner.nextLine());
-                if (durata <= 0) {
-                    System.out.println("Durata positiva richiesta.");
-                    continue;
-                }
-                return inizio.plusHours(durata);
-            } catch (NumberFormatException e) {
-                System.out.println("Numero non valido.");
-            }
-        }
-    }
-
     private void flussoAggiungiOperazione() {
         try {
             System.out.println("\n--- Aggiungi Operazione ---");
-            int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
+            int microchip = ui.leggiIntero("Inserisci Microchip dell'animale: ");
             if (this.ricercaAnimale(microchip) == null) {
                 System.out.println("Errore: Animale non trovato. Registrate prima l'animale.");
                 return;
             }
 
-            String titolo = leggiStringa("Titolo Operazione: ");
-            String descrizione = leggiStringa("Descrizione: ");
-            String tipo = leggiStringa("Tipo Operazione: ");
+            String titolo = ui.leggiStringa("Titolo Operazione: ");
+            String descrizione = ui.leggiStringa("Descrizione: ");
+            String tipo = ui.leggiStringa("Tipo Operazione: ");
 
             LocalDateTime inizio = null;
             LocalDateTime fine = null;
 
             // Ciclo orario (PRIMA dei membri)
             while (true) {
-                inizio = ottieniDataOraValida("Inizio");
-                fine = ottieniDataOraFineValida(inizio);
+                inizio = ui.ottieniDataOraValida("Inizio");
+                fine = ui.ottieniDataOraFineValida(inizio);
                 try {
                     // Controlla disponibilità
                     this.checkDisponibilita(inizio, fine);
@@ -706,57 +652,10 @@ public class VetCare {
             }
 
             // Aggiungi Membri (DOPO aver validato tutto il resto)
-            Map<Integer, MembroEquipe> membriSelezionati = new java.util.HashMap<>();
-            Set<Integer> membriAggiuntiIds = new HashSet<>();
-
-            while (true) {
-                System.out.println("\nGestione Equipe per l'operazione:");
-                System.out.println("Membri disponibili:");
-
-                boolean disponibili = false;
-                for (MembroEquipe m : this.getMembri()) {
-                    if (!membriAggiuntiIds.contains(m.getIdmembro())) {
-                        System.out.println(m);
-                        disponibili = true;
-                    }
-                }
-
-                if (!disponibili && membriSelezionati.isEmpty()) {
-                    System.out.println("Nessun membro disponibile da aggiungere.");
-                    break;
-                } else if (!disponibili) {
-                    System.out.println("Tutti i membri disponibili sono stati aggiunti.");
-                    break;
-                }
-
-                // Loop convalida risposta s/n
-                String scelta = "";
-                while (true) {
-                    scelta = leggiStringa("Vuoi aggiungere un membro? (s/n): ");
-                    if (scelta.equalsIgnoreCase("s") || scelta.equalsIgnoreCase("n")) {
-                        break;
-                    }
-                    System.out.println("Input non valido, per favore inserisci 's' o 'n'.");
-                }
-
-                if (scelta.equalsIgnoreCase("n"))
-                    break;
-
-                int idMembro = leggiIntero("ID Membro: ");
-
-                if (membriAggiuntiIds.contains(idMembro)) {
-                    System.out.println("Membro già aggiunto.");
-                    continue;
-                }
-
-                MembroEquipe m = this.getMembro(idMembro);
-                if (m != null) {
-                    membriSelezionati.put(idMembro, m);
-                    membriAggiuntiIds.add(idMembro);
-                    System.out.println("Membro aggiunto alla lista provvisoria.");
-                } else {
-                    System.out.println("Membro non trovato.");
-                }
+            Map<Integer, MembroEquipe> membriSelezionati = gestisciSelezioneMembri();
+            if (membriSelezionati == null) {
+                System.out.println("Operazione annullata durante la selezione dei membri.");
+                return;
             }
 
             // Creazione Operazione (Alla fine)
@@ -772,5 +671,75 @@ public class VetCare {
         } catch (Exception e) {
             System.out.println("Errore imprevisto: " + e.getMessage());
         }
+    }
+
+    private Map<Integer, MembroEquipe> gestisciSelezioneMembri() {
+        Map<Integer, MembroEquipe> membriSelezionati = new java.util.HashMap<>();
+        Set<Integer> membriAggiuntiIds = new HashSet<>();
+
+        while (true) {
+            System.out.println("\nGestione Equipe per l'operazione:");
+            System.out.println("Membri disponibili:");
+
+            boolean disponibili = false;
+            for (MembroEquipe m : this.getMembri()) {
+                if (!membriAggiuntiIds.contains(m.getIdmembro())) {
+                    System.out.println(m);
+                    disponibili = true;
+                }
+            }
+
+            if (!disponibili && membriSelezionati.isEmpty()) {
+                System.out.println("Nessun membro disponibile da aggiungere.");
+                return null;
+            } else if (!disponibili) {
+                System.out.println("Tutti i membri disponibili sono stati aggiunti.");
+                break;
+            }
+
+            // Loop convalida risposta s/n
+            String scelta = "";
+            while (true) {
+                scelta = ui.leggiStringa("Vuoi aggiungere un membro? (s/n): ");
+                if (scelta.equalsIgnoreCase("s") || scelta.equalsIgnoreCase("n")) {
+                    break;
+                }
+                System.out.println("Input non valido, per favore inserisci 's' o 'n'.");
+            }
+
+            if (scelta.equalsIgnoreCase("n")) {
+                if (membriSelezionati.isEmpty()) {
+                    System.out.println("Attenzione: Nessun membro selezionato per l'operazione.");
+                    String conf = ui.leggiStringa("Vuoi davvero procedere senza membri? (s/n): ");
+                    if (conf.equalsIgnoreCase("s"))
+                        break;
+                    else
+                        return null; // Annulla tutto? O continua loop? Facciamo continue loop.
+                    // Anzi, se annulla selezione membri, annulla operazione.
+                } else {
+                    break;
+                }
+            }
+
+            if (scelta.equalsIgnoreCase("n"))
+                break; // Double check break
+
+            int idMembro = ui.leggiIntero("ID Membro: ");
+
+            if (membriAggiuntiIds.contains(idMembro)) {
+                System.out.println("Membro già aggiunto.");
+                continue;
+            }
+
+            MembroEquipe m = this.getMembro(idMembro);
+            if (m != null) {
+                membriSelezionati.put(idMembro, m);
+                membriAggiuntiIds.add(idMembro);
+                System.out.println("Membro aggiunto alla lista provvisoria.");
+            } else {
+                System.out.println("Membro non trovato.");
+            }
+        }
+        return membriSelezionati;
     }
 }

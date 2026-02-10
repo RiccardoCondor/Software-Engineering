@@ -2,6 +2,7 @@ package org.example;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.example.exceptions.*;
 
 class MagazzinoTest {
 
@@ -51,10 +52,13 @@ class MagazzinoTest {
         assertEquals("Tachipirina", f.getNome());
 
         // Caso 2: ID assente
-        assertNull(m.selezionaFarmacoById(9999));
+        assertThrows(EntitaNonTrovataException.class, () -> m.selezionaFarmacoById(9999));
 
         // Caso 3: ID <= 0
-        assertNull(m.selezionaFarmacoById(0));
-        assertNull(m.selezionaFarmacoById(-5));
+        assertThrows(EntitaNonTrovataException.class, () -> m.selezionaFarmacoById(0));
+        assertThrows(EntitaNonTrovataException.class, () -> m.selezionaFarmacoById(-5));
+
+        // Caso 4: Farmaco Scaduto (ID 3: scaduto 2024-10-10)
+        assertThrows(FarmacoScadutoException.class, () -> m.selezionaFarmacoById(3));
     }
 }

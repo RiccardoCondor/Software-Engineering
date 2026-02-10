@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.exceptions.*;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,20 +28,18 @@ public class Calendario {
      * 3. Non deve estendersi su più giorni.
      * 4. Deve durare un numero intero di ore.
      */
-    public void aggiungiAppuntamento(Animale animale, String titolo, String descrizione, LocalDateTime inizio, LocalDateTime fine) {
-        Appuntamento appuntamento = new Appuntamento(animale,titolo, descrizione, inizio, fine);
-        validaAppuntamento(appuntamento);
-        verificaSovrapposizione(appuntamento);
+    public void aggiungiAppuntamento(Animale animale, String titolo, String descrizione, LocalDateTime inizio,
+            LocalDateTime fine) {
+        Appuntamento appuntamento = new Appuntamento(animale, titolo, descrizione, inizio, fine);
+        validaTutto(appuntamento);
 
         LocalDate data = appuntamento.getInizio().toLocalDate();
         mappaAppuntamenti.computeIfAbsent(data, k -> new ArrayList<>()).add(appuntamento);
-        // se necessario
         Collections.sort(mappaAppuntamenti.get(data));
     }
 
     public void aggiungiAppuntamento(Appuntamento app) {
-        validaAppuntamento(app);
-        verificaSovrapposizione(app);
+        validaTutto(app);
 
         LocalDate data = app.getInizio().toLocalDate();
         mappaAppuntamenti.computeIfAbsent(data, k -> new ArrayList<>()).add(app);
@@ -48,28 +47,31 @@ public class Calendario {
     }
 
     public void checkDisponibilita(LocalDateTime inizio, LocalDateTime fine) {
-        // Creiamo un appuntamento temporaneo solo per sfruttare la logica di controllo esistente
+        // Creiamo un appuntamento temporaneo solo per sfruttare la logica di controllo
+        // esistente
         // o replichiamo la logica. Replichiamo la logica per pulizia.
-        
+
         LocalDate data = inizio.toLocalDate();
         List<Appuntamento> appuntamentiEsistenti = mappaAppuntamenti.getOrDefault(data, Collections.emptyList());
 
         for (Appuntamento esistente : appuntamentiEsistenti) {
-             LocalDateTime inizio1 = inizio;
-             LocalDateTime fine1 = fine;
-             LocalDateTime inizio2 = esistente.getInizio();
-             LocalDateTime fine2 = esistente.getFine();
+            LocalDateTime inizio1 = inizio;
+            LocalDateTime fine1 = fine;
+            LocalDateTime inizio2 = esistente.getInizio();
+            LocalDateTime fine2 = esistente.getFine();
 
-             if (inizio1.isBefore(fine2) && fine1.isAfter(inizio2)) {
+            if (inizio1.isBefore(fine2) && fine1.isAfter(inizio2)) {
                 throw new SovrapposizioneAppuntamentoException(
                         "Slot orario non disponibile. L'orario richiesto si sovrappone con [" + esistente.getTitolo()
                                 + "]. Inserire una fascia oraria valida.");
-             }
+            }
         }
     }
 
-    private void verificaSovrapposizione(Appuntamento nuovoApp) {
-        checkDisponibilita(nuovoApp.getInizio(), nuovoApp.getFine());
+    private void validaTutto(Appuntamento app) {
+        validaAppuntamento(app);
+        // Check atomicamente la disponibilità
+        checkDisponibilita(app.getInizio(), app.getFine());
     }
 
     private boolean siSovrappone(Appuntamento app1, Appuntamento app2) {

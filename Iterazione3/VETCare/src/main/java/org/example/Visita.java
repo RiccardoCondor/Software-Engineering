@@ -1,6 +1,7 @@
 package org.example;
 
 import java.time.LocalDate;
+import org.example.exceptions.*;
 
 public class Visita {
     private static int ctr = 0;
@@ -9,7 +10,6 @@ public class Visita {
     private String diagnosi;
     private int idVisita;
     private Terapia terapia = null;
-    private Magazzino magazzino;
     private Laboratorio laboratorio;
     private int idEsame = -1;
 
@@ -18,7 +18,6 @@ public class Visita {
         this.esameObiettivo = esameObiettivo;
         this.diagnosi = diagnosi;
         this.idVisita = ++ctr;
-        this.magazzino = Magazzino.getInstance();
         this.laboratorio = Laboratorio.getInstance();
     }
 
@@ -42,10 +41,6 @@ public class Visita {
         return terapia;
     }
 
-    public Magazzino getMagazzino() {
-        return magazzino;
-    }
-
     public Laboratorio getLaboratorio() {
         return laboratorio;
     }
@@ -55,7 +50,6 @@ public class Visita {
                 || data_i.isAfter(data_f)) {
             return null;
         }
-        magazzino.selezionaFarmacoById(f.getId());
         this.terapia = new Terapia();
         terapia.setFarmaco(f);
         terapia.setPosologia(posologia);
@@ -63,17 +57,6 @@ public class Visita {
         terapia.setData_inizio(data_i);
         terapia.setData_fine(data_f);
         return terapia;
-    }
-
-    public boolean ricercaFarmaco(String nome) {
-        return this.magazzino.ricercaFarmaci(nome);
-    }
-
-    public Farmaco getFarmacoById(int id) {
-        return this.magazzino.getFarmacoByid(id);
-    }
-    public Farmaco selezionaFarmacoByid(int id){
-        return this.magazzino.selezionaFarmacoById(id);
     }
 
     public String stampaTerapia() {

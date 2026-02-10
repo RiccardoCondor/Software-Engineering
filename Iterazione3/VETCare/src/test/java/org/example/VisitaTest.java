@@ -17,7 +17,7 @@ class VisitaTest {
     @Test
     void testCreaTerapia() {
         Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
-        Farmaco f = new Farmaco("Aspirina", 1, 10, LocalDate.now().plusYears(1));
+        Farmaco f = new Farmaco("Oki", 4, 100, LocalDate.now().plusYears(1));
 
         // Caso 1: Input validi
         Terapia t = visita.creaTerapia(f, 1, "ogni 8 ore", LocalDate.now(), LocalDate.now().plusDays(5));
@@ -46,50 +46,6 @@ class VisitaTest {
                                                                                                           // fine
     }
 
-    // Classi di equivalenza per ricercaFarmaco (delega a Magazzino):
-    // 1) Nome valido ed esistente -> true
-    // 2) Nome non esistente -> false
-    // 3) Nome null o vuoto -> false
-    @Test
-    void testRicercaFarmaco() {
-        Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
-
-        // Assumiamo che Magazzino sia inizializzato con i dati di default (es.
-        // "Tachipirina")
-        // Caso 1: Nome esistente
-        assertTrue(visita.ricercaFarmaco("Tachipirina"));
-
-        // Caso 2: Nome non esistente
-        assertFalse(visita.ricercaFarmaco("FarmacoInesistente"));
-
-        // Caso 3: Nome null o vuoto (Gestito da Magazzino)
-        assertFalse(visita.ricercaFarmaco(null));
-        assertFalse(visita.ricercaFarmaco(""));
-        assertFalse(visita.ricercaFarmaco("   "));
-    }
-
-    // Classi di equivalenza per selezionaFarmacoById (delega a Magazzino):
-    // 1) ID valido ed esistente -> Farmaco
-    // 2) ID non esistente -> null
-    // 3) ID <= 0 -> null
-    @Test
-    void testSelezionaFarmacoById() {
-        Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
-
-        // Assumiamo che ID 2 esista (Tachipirina)
-        // Caso 1: ID valido di un farmaco non scaduto o non terminato
-        Farmaco f = visita.selezionaFarmacoByid(2);
-        assertNotNull(f);
-        assertEquals(2, f.getId());
-
-        // Caso 2: ID non esistente
-        assertNull(visita.selezionaFarmacoByid(9999));
-
-        // Caso 3: ID <= 0
-        assertNull(visita.selezionaFarmacoByid(0));
-        assertNull(visita.selezionaFarmacoByid(-1));
-    }
-
     // Classi di equivalenza per stampaTerapia:
     // 1) Terapia null -> Messaggio "Nessuna terapia associata"
     // 2) Terapia presente -> Stringa con dettagli
@@ -101,11 +57,11 @@ class VisitaTest {
         assertEquals("Nessuna terapia associata", visita.stampaTerapia());
 
         // Caso 2: Terapia presente
-        Farmaco f = new Farmaco("Aspirina", 123, 10, LocalDate.of(2025, 1, 1));
+        Farmaco f = new Farmaco("Oki", 4, 100, LocalDate.of(2025, 1, 1));
         visita.creaTerapia(f, 2, "3 volte al di", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5));
 
         String output = visita.stampaTerapia();
-        assertTrue(output.contains("Terapia: Aspirina"));
+        assertTrue(output.contains("Terapia: Oki"));
         assertTrue(output.contains("Posologia: 2"));
         assertTrue(output.contains("Frequenza: 3 volte al di"));
     }
