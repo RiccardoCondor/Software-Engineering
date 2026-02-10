@@ -47,17 +47,29 @@ public class Calendario {
         Collections.sort(mappaAppuntamenti.get(data));
     }
 
-    private void verificaSovrapposizione(Appuntamento nuovoApp) {
-        LocalDate data = nuovoApp.getInizio().toLocalDate();
+    public void checkDisponibilita(LocalDateTime inizio, LocalDateTime fine) {
+        // Creiamo un appuntamento temporaneo solo per sfruttare la logica di controllo esistente
+        // o replichiamo la logica. Replichiamo la logica per pulizia.
+        
+        LocalDate data = inizio.toLocalDate();
         List<Appuntamento> appuntamentiEsistenti = mappaAppuntamenti.getOrDefault(data, Collections.emptyList());
 
         for (Appuntamento esistente : appuntamentiEsistenti) {
-            if (siSovrappone(nuovoApp, esistente)) {
+             LocalDateTime inizio1 = inizio;
+             LocalDateTime fine1 = fine;
+             LocalDateTime inizio2 = esistente.getInizio();
+             LocalDateTime fine2 = esistente.getFine();
+
+             if (inizio1.isBefore(fine2) && fine1.isAfter(inizio2)) {
                 throw new SovrapposizioneAppuntamentoException(
                         "Slot orario non disponibile. L'orario richiesto si sovrappone con [" + esistente.getTitolo()
                                 + "]. Inserire una fascia oraria valida.");
-            }
+             }
         }
+    }
+
+    private void verificaSovrapposizione(Appuntamento nuovoApp) {
+        checkDisponibilita(nuovoApp.getInizio(), nuovoApp.getFine());
     }
 
     private boolean siSovrappone(Appuntamento app1, Appuntamento app2) {
@@ -168,7 +180,7 @@ public class Calendario {
                 System.out.printf("  %02d:00 - %02d:00 | %s%n",
                         app.getInizio().getHour(),
                         app.getFine().getHour(),
-                        app.getTitolo());
+                        app.toString());
             }
         }
     }

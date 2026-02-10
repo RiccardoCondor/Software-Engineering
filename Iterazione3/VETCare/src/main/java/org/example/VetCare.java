@@ -1,6 +1,7 @@
 package org.example;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -174,6 +175,10 @@ public class VetCare {
         calendario.aggiungiAppuntamento(a, titolo, descrizione, inizio, fine);
     }
 
+    public void checkDisponibilita(LocalDateTime inizio, LocalDateTime fine) {
+        calendario.checkDisponibilita(inizio, fine);
+    }
+    
     // Gestione Membri Equipe
     public void aggiungiMembroEquipe(MembroEquipe m) {
         if (m != null && !membri.containsKey(m.getIdmembro())) {
@@ -190,14 +195,14 @@ public class VetCare {
     }
 
     // Creazione Operazione
-    public Operazione creaOperazione(int microchip, String titolo, String descrizione, java.time.LocalDateTime inizio,
-            java.time.LocalDateTime fine, String tipo) {
+    public Operazione creaOperazione(int microchip, String titolo, String descrizione, LocalDateTime inizio,
+            LocalDateTime fine, String tipo, Map<Integer, MembroEquipe> membri) {
         Animale a = animali.get(microchip);
         if (a == null) {
             throw new IllegalArgumentException("Animale non trovato per microchip: " + microchip);
         }
 
-        Operazione op = new Operazione(a, titolo, descrizione, inizio, fine, tipo);
+        Operazione op = new Operazione(a, titolo, descrizione, inizio, fine, tipo, membri);
         
         calendario.aggiungiAppuntamento(op); 
         return op;

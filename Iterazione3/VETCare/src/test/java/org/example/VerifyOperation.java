@@ -25,15 +25,14 @@ public class VerifyOperation {
         LocalDateTime fine = inizio.plusHours(2);
         
         try {
-            Operazione op = v.creaOperazione(999, "Op Test", "Descrizione Test", inizio, fine, "Chirurgia");
+            // 3. Preparazione Membri
+            java.util.Map<Integer, MembroEquipe> membriOp = new java.util.HashMap<>();
+            membriOp.put(1, v.getMembro(1)); // Dr. Rossi
+            membriOp.put(2, v.getMembro(2)); // Inf. Bianchi
+
+            // 4. Crea Operazione con membri
+            Operazione op = v.creaOperazione(999, "Op Test", "Descrizione Test", inizio, fine, "Chirurgia", membriOp);
             System.out.println("Operazione creata: " + op);
-            
-            // 4. Aggiungi membri
-            v.aggiungiMembroAOperazione(op, 1); // Dr. Rossi
-            v.aggiungiMembroAOperazione(op, 2); // Inf. Bianchi
-            
-            System.out.println("Membri aggiunti all'operazione.");
-            System.out.println(op);
             
             if (!op.toString().contains("Dr. Rossi") || !op.toString().contains("Inf. Bianchi")) {
                  System.err.println("ERRORE: Membri non presenti nella stringa dell'operazione");
@@ -43,6 +42,20 @@ public class VerifyOperation {
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        }
+        
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // 5. Verifica checkDisponibilita
+        try {
+            v.checkDisponibilita(inizio, fine);
+            System.err.println("ERRORE: checkDisponibilita doveva lanciare eccezione per sovrapposizione");
+             System.exit(1);
+        } catch (SovrapposizioneAppuntamentoException e) {
+            System.out.println("checkDisponibilita ha rilevato correttamente la sovrapposizione.");
         }
         
         System.out.println("Verifica Completata con Successo");

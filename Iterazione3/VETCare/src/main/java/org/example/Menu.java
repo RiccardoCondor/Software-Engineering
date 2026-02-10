@@ -7,6 +7,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
 
 public class Menu {
     private VetCare controller;
@@ -471,7 +472,7 @@ public class Menu {
             System.out.println("\n--- Aggiungi Operazione ---");
             int microchip = leggiIntero("Inserisci Microchip dell'animale: ");
             if (controller.ricercaAnimale(microchip) == null) {
-                System.out.println("Errore: Animale non trovato. Registrare prima l'animale.");
+                System.out.println("Errore: Animale non trovato. Registrate prima l'animale.");
                 return;
             }
 
@@ -479,23 +480,26 @@ public class Menu {
             String descrizione = leggiStringa("Descrizione: ");
             String tipo = leggiStringa("Tipo Operazione: ");
 
-            // Ciclo orario
-            Operazione op = null;
+            LocalDateTime inizio = null;
+            LocalDateTime fine = null;
+
+            // Ciclo orario (PRIMA dei membri)
             while (true) {
-                LocalDateTime inizio = ottieniDataOraValida("Inizio");
-                LocalDateTime fine = ottieniDataOraFineValida(inizio);
+                inizio = ottieniDataOraValida("Inizio");
+                fine = ottieniDataOraFineValida(inizio);
                 try {
-                    op = controller.creaOperazione(microchip, titolo, descrizione, inizio, fine, tipo);
-                    System.out.println("Operazione creata con successo!");
-                    break;
+                    // Controlla disponibilità
+                    controller.checkDisponibilita(inizio, fine);
+                    break; // Se non lancia eccezione, orario è valido
                 } catch (IllegalArgumentException | SovrapposizioneAppuntamentoException e) {
                    System.out.println("Errore: " + e.getMessage());
                    System.out.println("Riprova inserimento orario.");
                 }
             }
 
-            // Aggiungi Membri
-            Set<Integer> membriAggiunti = new HashSet<>();
+            // Aggiungi Membri (DOPO aver validato tutto il resto)
+            Map<Integer, MembroEquipe> membriSelezionati = new java.util.HashMap<>();
+            Set<Integer> membriAggiuntiIds = new HashSet<>();
             
             while (true) {
                 System.out.println("\nGestione Equipe per l'operazione:");
@@ -503,34 +507,56 @@ public class Menu {
                 
                 boolean disponibili = false;
                 for (MembroEquipe m : controller.getMembri()) {
-                    if (!membriAggiunti.contains(m.getIdmembro())) {
+                    if (!membriAggiuntiIds.contains(m.getIdmembro())) {
                         System.out.println(m);
                         disponibili = true;
                     }
                 }
                 
-                if (!disponibili) {
-                    System.out.println("Tutti i membri sono stati aggiunti.");
+                if (!disponibili && membriSelezionati.isEmpty()) {
+                    System.out.println("Nessun membro disponibile da aggiungere.");
+                     break;
+                } else if (!disponibili) {
+                    System.out.println("Tutti i membri disponibili sono stati aggiunti.");
                     break;
                 }
 
-                String scelta = leggiStringa("Vuoi aggiungere un membro? (s/n): ");
-                if (!scelta.equalsIgnoreCase("s")) break;
+                // Loop convalida risposta s/n
+                String scelta = "";
+                while (true) {
+                    scelta = leggiStringa("Vuoi aggiungere un membro? (s/n): ");
+                    if (scelta.equalsIgnoreCase("s") || scelta.equalsIgnoreCase("n")) {
+                         break;
+                    }
+                    System.out.println("Input non valido, per favore inserisci 's' o 'n'.");
+                }
+
+                if (scelta.equalsIgnoreCase("n")) break;
 
                 int idMembro = leggiIntero("ID Membro: ");
                 
-                if (membriAggiunti.contains(idMembro)) {
+                if (membriAggiuntiIds.contains(idMembro)) {
                     System.out.println("Membro già aggiunto.");
                     continue;
                 }
                 
-                try {
-                    controller.aggiungiMembroAOperazione(op, idMembro);
-                    membriAggiunti.add(idMembro);
-                    System.out.println("Membro aggiunto.");
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Errore: " + e.getMessage());
+                MembroEquipe m = controller.getMembro(idMembro);
+                if (m != null) {
+                    membriSelezionati.put(idMembro, m);
+                    membriAggiuntiIds.add(idMembro);
+                    System.out.println("Membro aggiunto alla lista provvisoria.");
+                } else {
+                    System.out.println("Membro non trovato.");
                 }
+            }
+
+            // Creazione Operazione (Alla fine)
+            try {
+                Operazione op = controller.creaOperazione(microchip, titolo, descrizione, inizio, fine, tipo, membriSelezionati);
+                System.out.println("Operazione creata con successo!");
+                System.out.println(op); 
+            } catch (Exception e) {
+                System.out.println("Errore finale creazione: " + e.getMessage());
             }
 
         } catch (Exception e) {

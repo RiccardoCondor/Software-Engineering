@@ -9,10 +9,10 @@ public class Operazione extends Appuntamento {
     private Map<Integer, MembroEquipe> membri;
 
     public Operazione(Animale animale, String titolo, String descrizione, LocalDateTime inizio, LocalDateTime fine,
-            String tipo) {
+            String tipo, Map<Integer, MembroEquipe> uomini) {
         super(animale, titolo, descrizione, inizio, fine);
         this.tipoOperazione = tipo;
-        membri = new HashMap<>();
+        this.membri = uomini;
     }
 
     public void addMembro(MembroEquipe m) {
