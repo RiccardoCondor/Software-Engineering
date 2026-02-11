@@ -270,7 +270,7 @@ public class VetCare {
                         visualizzaVisiteAnimale();
                         break;
                     case "5":
-                        richiediEsami();
+                        risultatiEsami();
                         break;
                     case "6":
                         this.getCalendario().stampaCalendarioGriglia();
@@ -537,7 +537,7 @@ public class VetCare {
         }
     }
 
-    private void richiediEsami() {
+    private void risultatiEsami() {
         System.out.println("\n--- Richiedi e Salva Esami ---");
         int microchip = ui.leggiIntero("Inserisci Microchip dell'animale: ");
 
