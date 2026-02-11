@@ -252,6 +252,8 @@ public class VetCare {
             ui.mostraMessaggio("8. Aggiungi appuntamento");
             ui.mostraMessaggio("9. Aggiungi Operazione");
             ui.mostraMessaggio("10. Gestisci Inventario");
+            ui.mostraMessaggio("11. Gestisci Turni");
+            ui.mostraMessaggio("12. Visualizza Turni Settimanali");
             ui.mostraMessaggio("0. Esci");
 
             String input = ui.leggiStringa("Seleziona un'opzione: ");
@@ -287,6 +289,12 @@ public class VetCare {
                         break;
                     case "10":
                         gestisciInventario();
+                        break;
+                    case "11":
+                        flussoGestisciTurni();
+                        break;
+                    case "12":
+                        this.getCalendario().stampaTurniGriglia();
                         break;
                     case "0":
                         running = false;
@@ -738,5 +746,45 @@ public class VetCare {
             this.magazzino.inserisciOrdine(nome, quantita);
         }
         System.out.println("Gestione inventario completata.");
+    }
+
+    private void flussoGestisciTurni() {
+        System.out.println("\n--- Gestione Turni ---");
+
+        // Selezione Membro
+        System.out.println("Membri disponibili:");
+        for (MembroEquipe m : this.getMembri()) {
+            System.out.println(m);
+        }
+
+        int idMembro = -1;
+        MembroEquipe membro = null;
+        while (membro == null) {
+            idMembro = ui.leggiIntero("ID Membro (-1 per uscire): ");
+            if (idMembro == -1) return;
+
+            membro = this.getMembro(idMembro);
+            if (membro == null) {
+                System.out.println("Membro non trovato. Riprova.");
+            }
+        }
+
+        // Inserimento dettagli Turno
+        while (true) {
+            LocalDateTime inizio = ui.ottieniDataOraValida("Inizio Turno");
+            LocalDateTime fine = ui.ottieniDataOraFineValida(inizio);
+
+            try {
+                this.calendario.aggiungiTurno(membro, inizio, fine);
+                System.out.println("Turno aggiunto con successo per " + membro.getNome() + "!");
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Errore nell'aggiunta del turno: " + e.getMessage());
+                System.out.println("Riprova inserimento orario.");
+            } catch (Exception e) {
+                System.out.println("Errore imprevisto: " + e.getMessage());
+                break;
+            }
+        }
     }
 }
