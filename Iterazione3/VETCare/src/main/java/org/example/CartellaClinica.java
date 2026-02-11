@@ -42,12 +42,6 @@ public class CartellaClinica {
         return java.util.Collections.unmodifiableCollection(visite.values());
     }
 
-    public List<Esame> risultatiEsami(int microchip) {
-        List<Esame> nuoviEsami = Laboratorio.getInstance().risultatiEsame(microchip);
-        confermaEsami(nuoviEsami);
-        return nuoviEsami;
-    }
-
     public void confermaEsami(List<Esame> nuoviEsami) {
         for (Esame esame : nuoviEsami) {
             this.esami.put(esame.getId(), esame);

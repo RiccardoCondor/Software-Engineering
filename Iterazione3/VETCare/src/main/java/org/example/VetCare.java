@@ -18,6 +18,7 @@ public class VetCare {
     private static VetCare instance;
     private ConsoleUI ui;
     private Magazzino magazzino;
+    private Laboratorio laboratorio;
 
     public static VetCare getInstance() {
         if (instance == null) {
@@ -35,6 +36,7 @@ public class VetCare {
         this.calendario = new Calendario();
         this.ui = new ConsoleUI();
         this.magazzino = Magazzino.getInstance();
+        this.laboratorio = Laboratorio.getInstance();
 
         membri.put(1, new Anestetista(1, "Dr. Rossi"));
         membri.put(2, new Infermiere(2, "Inf. Bianchi"));
@@ -79,7 +81,6 @@ public class VetCare {
             return proprietarioCorrente; // Ritorna esistente se trovato
         }
         proprietarioCorrente = new Proprietario(nome, cf, contatto);
-        proprietari.put(cf, proprietarioCorrente);
         return proprietarioCorrente;
     }
 
@@ -144,33 +145,45 @@ public class VetCare {
         }
     }
 
-    // Metodo helper per la ricerca farmaci (per il menu)
-    public boolean cercaFarmaco(String nome) {
-        // Refactoring: Access Magazzino directly, no need for active animal/visit for
-        // lookup
-        return this.magazzino.ricercaFarmaci(nome);
-    }
+    public java.util.List<Esame> sincronizzaEsami(Animale animale) {
+        if (animale == null || animale.getCartella() == null)
+            return new java.util.ArrayList<>();
 
-    public Farmaco getFarmacoById(int id) {
-        // Refactoring: Access Magazzino directly
-        return this.magazzino.getFarmacoByid(id);
-    }
-
-    public int aggiungiEsame(String tipoEsame, int microchip) {
-
-        Animale a = animali.get(microchip);
-        if (a == null)
-            throw new IllegalArgumentException("Animale non trovato");
-
-        if (!a.getCartella().haVisitaInCorso())
-            throw new IllegalStateException("Nessuna visita attiva per questo animale");
-
-        // Refactoring: Access Visita directly
-        Visita visita = a.getCartella().getVisitaCorrente();
-        if (visita != null) {
-            return visita.richiediEsame(tipoEsame, microchip);
+        java.util.List<Esame> nuoviEsami = laboratorio.risultatiEsame(animale.getMicrochip());
+        if (nuoviEsami != null && !nuoviEsami.isEmpty()) {
+            animale.getCartella().confermaEsami(nuoviEsami);
         }
-        return -1;
+        return nuoviEsami;
+    }
+
+    private void gestisciRichiestaEsame() {
+
+        int scelta = ui.leggiIntero("vuoi aggiungere un Esame? (1 per sì, altro per no): ");
+        if (scelta != 1) {
+            System.out.println("Esame non aggiunto");
+            return;
+        }
+
+        if (animaleCorrente == null || !animaleCorrente.getCartella().haVisitaInCorso()) {
+            System.out.println("Nessuna visita in corso.");
+            return;
+        }
+        int idEsame = -1;
+        do {
+            String tipoEsame = ui.leggiStringa("Tipo Esame (urine, sangue, completo) o 'esci' per annullare: ");
+            if (tipoEsame.equalsIgnoreCase("esci")) {
+                System.out.println("Operazione annullata.");
+                return;
+            }
+
+            idEsame = laboratorio.produciesame(tipoEsame, animaleCorrente.getMicrochip());
+            if (idEsame > 0) {
+                animaleCorrente.getCartella().getVisitaCorrente().setIdEsame(idEsame);
+                System.out.println("Esame richiesto con successo. ID: " + idEsame);
+            } else {
+                System.out.println("Errore nella richiesta esame. Tipo non valido?");
+            }
+        } while (idEsame == -1);
     }
 
     public void confermaVisita() {
@@ -221,14 +234,6 @@ public class VetCare {
 
         calendario.aggiungiAppuntamento(op);
         return op;
-    }
-
-    public void aggiungiMembroAOperazione(Operazione op, int idMembro) {
-        MembroEquipe m = membri.get(idMembro);
-        if (m == null) {
-            throw new IllegalArgumentException("Membro non trovato: " + idMembro);
-        }
-        op.addMembro(m);
     }
 
     // --- MENU INTEGRATION START ---
@@ -392,7 +397,7 @@ public class VetCare {
                 visitaCreata = true;
 
                 gestisciInputTerapia();
-                gestisciInputEsame(animale.getMicrochip());
+                gestisciRichiestaEsame();
 
             } catch (IllegalArgumentException | IllegalStateException e) {
                 System.out.println("Errore: " + e.getMessage() + ". Riprova.");
@@ -425,7 +430,7 @@ public class VetCare {
                 return;
             }
 
-            if (this.cercaFarmaco(nomeFarmaco)) {
+            if (this.magazzino.ricercaFarmaci(nomeFarmaco)) {
                 boolean selectionDone = false;
                 while (!selectionDone) {
                     int idFarmaco = ui.leggiIntero("Id del Farmaco (-1 per cercare altro nome): ");
@@ -433,7 +438,7 @@ public class VetCare {
                         selectionDone = true;
                     } else {
                         try {
-                            Farmaco farmaco = this.getFarmacoById(idFarmaco);
+                            Farmaco farmaco = this.magazzino.getFarmacoByid(idFarmaco);
                             if (farmaco != null && farmaco.getNome().equalsIgnoreCase(nomeFarmaco)) {
                                 target = farmaco;
                                 selectionDone = true;
@@ -491,35 +496,6 @@ public class VetCare {
         }
     }
 
-    private void gestisciInputEsame(int microchip) {
-        int scelta = ui.leggiIntero("vuoi aggiungere un Esame? (1 per sì, altro per no): ");
-        if (scelta != 1) {
-            System.out.println("Esame non aggiunto");
-            return;
-        }
-
-        boolean done = false;
-        while (!done) {
-            String tipoEsame = ui.leggiStringa("Tipo Esame (urine, sangue, completo) o 'esci' per annullare: ");
-            if (tipoEsame.equalsIgnoreCase("esci")) {
-                System.out.println("Operazione annullata.");
-                return;
-            }
-
-            try {
-                int id = this.aggiungiEsame(tipoEsame, microchip);
-                if (id > 0) {
-                    System.out.println("Esame aggiunto con successo! ID Esame: " + id);
-                    done = true;
-                } else {
-                    System.out.println("Errore nell'aggiunta dell'esame. Riprova (forse tipo non valido?).");
-                }
-            } catch (Exception e) {
-                System.out.println("Errore: " + e.getMessage() + ". Riprova.");
-            }
-        }
-    }
-
     private void visualizzaAnimali() {
         System.out.println("\n--- Elenco Animali e Proprietari ---");
         for (Animale a : this.getAnimali()) {
@@ -574,7 +550,7 @@ public class VetCare {
         System.out.println("Richiedi esami per: " + animale.getNome());
         CartellaClinica cartella = animale.getCartella();
         if (cartella != null) {
-            java.util.List<Esame> esami = cartella.risultatiEsami(microchip);
+            java.util.List<Esame> esami = this.sincronizzaEsami(animale);
             if (esami.isEmpty()) {
                 System.out.println("Nessun nuovo esame trovato per questo animale.");
             } else {

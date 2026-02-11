@@ -66,19 +66,4 @@ class VisitaTest {
         assertTrue(output.contains("Frequenza: 3 volte al di"));
     }
 
-    // Test per Iterazione 2
-    // Verifica che richiediEsame deleghi correttamente a Laboratorio
-    @Test
-    void testRichiediEsame() {
-        Visita visita = new Visita("Anamnesi", "Esame", "Diagnosi");
-        int microchip = 999;
-
-        // Caso: Richiesta valida
-        int idEsame = visita.richiediEsame("urine", microchip);
-        assertTrue(idEsame > 0);
-
-        // Caso: Richiesta invalida (tipo sbagliato)
-        int idEsameInvalido = visita.richiediEsame("invalid", microchip);
-        assertEquals(-1, idEsameInvalido);
-    }
 }

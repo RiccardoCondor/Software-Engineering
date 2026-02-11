@@ -64,27 +64,4 @@ class CartellaClinicaTest {
         assertEquals(2, c.getVisite().size());
     }
 
-    // Test per Iterazione 2
-    // Verifica che risultatiEsami recuperi gli esami dal Laboratorio
-    @Test
-    void testRisultatiEsami() {
-        CartellaClinica c = new CartellaClinica();
-        c.nuovaVisita("anamnesi", "esameObbiettivo", "diagnosi");
-        Visita v = c.getVisitaCorrente();
-        int microchip = 555;
-        v.richiediEsame("urine", microchip);
-        c.confermaVisita();
-
-        // Esecuzione: recupera risultati
-        var risultati = c.risultatiEsami(microchip);
-
-        // Verifica
-        assertFalse(risultati.isEmpty());
-        assertEquals(1, risultati.size());
-
-        // Verifica che una seconda chiamata ritorni lista vuota (perché rimossi dal
-        // laboratorio pendenti)
-        var risultatiDopo = c.risultatiEsami(microchip);
-        assertTrue(risultatiDopo.isEmpty());
-    }
 }

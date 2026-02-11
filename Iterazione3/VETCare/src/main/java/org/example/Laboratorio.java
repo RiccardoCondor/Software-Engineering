@@ -64,6 +64,7 @@ public class Laboratorio {
                 esame = completo;
                 break;
             default:
+                --ctr;
                 return -1;
         }
 
