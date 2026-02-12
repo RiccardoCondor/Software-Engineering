@@ -84,9 +84,8 @@ public class Magazzino {
     }
 
     public void inserisciOrdine(String nome, int quantita) {
-        if (quantita <= 0 || nome == null || nome.equalsIgnoreCase("")) {
-            System.out.println("Errore: Quantità deve essere positiva e nome non vuoto");
-            return;
+        if (quantita <= 0 || nome == null || nome.trim().isEmpty()) {
+            throw new IllegalArgumentException("Errore: Quantità deve essere positiva e nome non vuoto");
         }
         // Default scadenza 1 anno, fornitore default
         Farmaco nuovo = new Farmaco(nome, nextId, quantita, LocalDate.now().plusYears(2), false,

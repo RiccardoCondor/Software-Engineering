@@ -88,5 +88,12 @@ class MagazzinoTest {
             }
         }
         assertTrue(found, "Il farmaco ordinato dovrebbe essere nella mappa dei farmaci");
+
+        // Test casi invalidi: quantità negativa o zero, nome null o vuoto
+        assertThrows(IllegalArgumentException.class, () -> m.inserisciOrdine("Valido", -10));
+        assertThrows(IllegalArgumentException.class, () -> m.inserisciOrdine("Valido", 0));
+        assertThrows(IllegalArgumentException.class, () -> m.inserisciOrdine(null, 50));
+        assertThrows(IllegalArgumentException.class, () -> m.inserisciOrdine("", 50));
+        assertThrows(IllegalArgumentException.class, () -> m.inserisciOrdine("   ", 50));
     }
 }

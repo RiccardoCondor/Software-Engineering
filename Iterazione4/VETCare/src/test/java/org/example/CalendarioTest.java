@@ -118,4 +118,36 @@ class CalendarioTest {
                                 () -> calendario.aggiungiAppuntamento(animale, "Adiacente Dopo", "Desc", fine,
                                                 fine.plusHours(1)));
         }
+
+        @Test
+        void testAggiungiTurno() {
+                MembroEquipe m1 = new MembroEquipe(1, "Dr. Rossi");
+                MembroEquipe m2 = new MembroEquipe(2, "Inf. Bianchi");
+
+                LocalDateTime start = LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(9, 0));
+                LocalDateTime end = start.plusHours(4); // 09:00 - 13:00
+
+                // 1. Successo
+                assertDoesNotThrow(() -> calendario.aggiungiTurno(m1, start, end));
+
+                // 2. Errore: Minuti non zero
+                assertThrows(IllegalArgumentException.class,
+                                () -> calendario.aggiungiTurno(m1, start.plusMinutes(15), end));
+
+                // 3. Errore: Durata < 1 ora
+                assertThrows(IllegalArgumentException.class,
+                                () -> calendario.aggiungiTurno(m1, start, start.plusMinutes(30)));
+
+                // 4. Errore: Fuori orario lavoro (prima delle 8)
+                LocalDateTime early = LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(7, 0));
+                assertThrows(IllegalArgumentException.class,
+                                () -> calendario.aggiungiTurno(m1, early, early.plusHours(2)));
+
+                // 5. Sovrapposizione stesso membro
+                assertThrows(IllegalArgumentException.class,
+                                () -> calendario.aggiungiTurno(m1, start.plusHours(1), end.plusHours(1)));
+
+                // 6. Successo: Altro membro nello stesso orario (OK)
+                assertDoesNotThrow(() -> calendario.aggiungiTurno(m2, start, end));
+        }
 }
