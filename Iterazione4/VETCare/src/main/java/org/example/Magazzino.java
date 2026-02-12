@@ -84,8 +84,8 @@ public class Magazzino {
     }
 
     public void inserisciOrdine(String nome, int quantita) {
-        if (quantita <= 0) {
-            System.out.println("Errore: Quantità deve essere positiva.");
+        if (quantita <= 0 || nome == null || nome.equalsIgnoreCase("")) {
+            System.out.println("Errore: Quantità deve essere positiva e nome non vuoto");
             return;
         }
         // Default scadenza 1 anno, fornitore default
