@@ -136,5 +136,18 @@ class VetCareTest {
         // dell'animale sia quella.
         assertNull(v.getAnimaleCorrente().getCartella().getVisitaCorrente());
         assertFalse(v.getAnimaleCorrente().getCartella().getVisite().isEmpty());
+
+        // Test conferma visita senza visita in corso (dovrebbe lanciare eccezione)
+        assertThrows(IllegalStateException.class, () -> {
+            v.confermaVisita();
+        });
+
+        // Test conferma visita su animale diverso senza visita
+        v.inserisciNuovoAnimale("FidoNew", "Cane", "Labrador", 9999, LocalDate.of(2021, 1, 1), CF);
+        v.confermaRegistrazione();
+        // Ora animale corrente è a2, che non ha visite in corso
+        assertThrows(IllegalStateException.class, () -> {
+            v.confermaVisita();
+        });
     }
 }
