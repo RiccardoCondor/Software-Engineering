@@ -52,4 +52,17 @@ public class CartellaClinica {
         return visitaCorrente != null;
     }
 
+    public void aggiungiTerapia(Farmaco f, int posologia, String frequenza, java.time.LocalDate inizio,
+            java.time.LocalDate fine) {
+        if (visitaCorrente != null) {
+            visitaCorrente.creaTerapia(f, posologia, frequenza, inizio, fine);
+        }
+    }
+
+    public void setIdEsame(int idEsame) {
+        if (visitaCorrente != null) {
+            visitaCorrente.setIdEsame(idEsame);
+        }
+    }
+
 }

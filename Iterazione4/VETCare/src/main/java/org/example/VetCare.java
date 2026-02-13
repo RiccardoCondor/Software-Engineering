@@ -123,12 +123,12 @@ public class VetCare {
                 || esameObiettivo.isEmpty() || diagnosi.isEmpty()) {
             throw new IllegalArgumentException("Dati visita incompleti");
         }
-        animaleCorrente.getCartella().nuovaVisita(anamnesi, esameObiettivo, diagnosi);
+        animaleCorrente.nuovaVisita(anamnesi, esameObiettivo, diagnosi);
     }
 
     public void aggiungiTerapia(String nomeFarmaco, int idFarmaco, int posologia, String frequenza, LocalDate inizio,
             LocalDate fine) {
-        if (animaleCorrente == null || !animaleCorrente.getCartella().haVisitaInCorso()) {
+        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso()) {
             throw new IllegalStateException("Nessuna visita in corso per aggiungere terapia");
         }
 
@@ -138,11 +138,8 @@ public class VetCare {
             throw new IllegalArgumentException("Farmaco non trovato o non corrispondente");
         }
 
-        // Refactoring: Access Visita directly
-        Visita visita = animaleCorrente.getCartella().getVisitaCorrente();
-        if (visita != null) {
-            visita.creaTerapia(f, posologia, frequenza, inizio, fine);
-        }
+        // Refactoring: Access Via Animale
+        animaleCorrente.aggiungiTerapia(f, posologia, frequenza, inizio, fine);
     }
 
     public java.util.List<Esame> sincronizzaEsami(Animale animale) {
@@ -151,7 +148,7 @@ public class VetCare {
 
         java.util.List<Esame> nuoviEsami = laboratorio.risultatiEsame(animale.getMicrochip());
         if (nuoviEsami != null && !nuoviEsami.isEmpty()) {
-            animale.getCartella().confermaEsami(nuoviEsami);
+            animale.confermaEsami(nuoviEsami);
         }
         return nuoviEsami;
     }
@@ -164,7 +161,7 @@ public class VetCare {
             return;
         }
 
-        if (animaleCorrente == null || !animaleCorrente.getCartella().haVisitaInCorso()) {
+        if (animaleCorrente == null || !animaleCorrente.haVisitaInCorso()) {
             System.out.println("Nessuna visita in corso.");
             return;
         }
@@ -178,7 +175,7 @@ public class VetCare {
 
             idEsame = laboratorio.produciesame(tipoEsame, animaleCorrente.getMicrochip());
             if (idEsame > 0) {
-                animaleCorrente.getCartella().getVisitaCorrente().setIdEsame(idEsame);
+                animaleCorrente.setIdEsame(idEsame);
                 System.out.println("Esame richiesto con successo. ID: " + idEsame);
             } else {
                 System.out.println("Errore nella richiesta esame. Tipo non valido?");
@@ -187,8 +184,8 @@ public class VetCare {
     }
 
     public void confermaVisita() {
-        if (animaleCorrente != null && animaleCorrente.getCartella().haVisitaInCorso()) {
-            animaleCorrente.getCartella().confermaVisita();
+        if (animaleCorrente != null && animaleCorrente.haVisitaInCorso()) {
+            animaleCorrente.confermaVisita();
         } else {
             throw new IllegalStateException("Nessuna visita da confermare");
         }
@@ -230,10 +227,7 @@ public class VetCare {
             throw new IllegalArgumentException("Animale non trovato per microchip: " + microchip);
         }
 
-        Operazione op = new Operazione(a, titolo, descrizione, inizio, fine, tipo, membri);
-
-        calendario.aggiungiAppuntamento(op);
-        return op;
+        return calendario.aggiungiAppuntamento(a, titolo, descrizione, inizio, fine, tipo, membri);
     }
 
     // --- MENU INTEGRATION START ---
@@ -761,7 +755,8 @@ public class VetCare {
         MembroEquipe membro = null;
         while (membro == null) {
             idMembro = ui.leggiIntero("ID Membro (-1 per uscire): ");
-            if (idMembro == -1) return;
+            if (idMembro == -1)
+                return;
 
             membro = this.getMembro(idMembro);
             if (membro == null) {

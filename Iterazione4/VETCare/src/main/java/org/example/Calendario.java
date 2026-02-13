@@ -40,6 +40,13 @@ public class Calendario {
         Collections.sort(mappaAppuntamenti.get(data));
     }
 
+    public Operazione aggiungiAppuntamento(Animale animale, String titolo, String descrizione, LocalDateTime inizio,
+            LocalDateTime fine, String tipo, Map<Integer, MembroEquipe> membri) {
+        Operazione op = new Operazione(animale, titolo, descrizione, inizio, fine, tipo, membri);
+        aggiungiAppuntamento(op);
+        return op;
+    }
+
     public void aggiungiAppuntamento(Appuntamento app) {
         validaTutto(app);
 
@@ -96,12 +103,13 @@ public class Calendario {
         List<Turno> turniGiorno = mappaTurni.getOrDefault(data, Collections.emptyList());
         for (Turno t : turniGiorno) {
             if (t.getMembro().getIdmembro() == m.getIdmembro()) { // Check same member
-                 // Check time overlap
-                 LocalDateTime tInizio = LocalDateTime.of(t.getData(), t.getOraInizio());
-                 LocalDateTime tFine = LocalDateTime.of(t.getData(), t.getOraFine());
-                 if (inizio.isBefore(tFine) && fine.isAfter(tInizio)) {
-                     throw new IllegalArgumentException("Il membro " + m.getNome() + " ha già un turno in questo orario.");
-                 }
+                // Check time overlap
+                LocalDateTime tInizio = LocalDateTime.of(t.getData(), t.getOraInizio());
+                LocalDateTime tFine = LocalDateTime.of(t.getData(), t.getOraFine());
+                if (inizio.isBefore(tFine) && fine.isAfter(tInizio)) {
+                    throw new IllegalArgumentException(
+                            "Il membro " + m.getNome() + " ha già un turno in questo orario.");
+                }
             }
         }
 
@@ -197,15 +205,16 @@ public class Calendario {
                 // 2. Se non c'è appuntamento, mostra Turno
                 if (!appuntamentoTrovato) {
                     for (Turno t : turniGiornalieri) {
-                         // Check overlap with current hour slot (oraCorrente to oraCorrente + 1)
-                         // Turno covers the slot if start <= current AND end > current
-                         // (Same logic as app checks)
-                         if (!t.getOraInizio().isAfter(oraCorrente) && t.getOraFine().isAfter(oraCorrente)) {
-                             String nome = t.getMembro().getNome();
-                             if (nome.length() > 6) nome = nome.substring(0, 6);
-                             contenutoCella = String.format(" %-6s ", nome); // Display Member Name
-                             break; // Show first found shift
-                         }
+                        // Check overlap with current hour slot (oraCorrente to oraCorrente + 1)
+                        // Turno covers the slot if start <= current AND end > current
+                        // (Same logic as app checks)
+                        if (!t.getOraInizio().isAfter(oraCorrente) && t.getOraFine().isAfter(oraCorrente)) {
+                            String nome = t.getMembro().getNome();
+                            if (nome.length() > 6)
+                                nome = nome.substring(0, 6);
+                            contenutoCella = String.format(" %-6s ", nome); // Display Member Name
+                            break; // Show first found shift
+                        }
                     }
                 }
 
@@ -234,7 +243,8 @@ public class Calendario {
         for (int ora = INIZIO_LAVORO.getHour(); ora < FINE_LAVORO.getHour(); ora++) {
             LocalTime oraCorrente = LocalTime.of(ora, 0);
 
-            // 1. Calcola quante righe servono per questa ora (max numero di turni sovrapposti in un giorno)
+            // 1. Calcola quante righe servono per questa ora (max numero di turni
+            // sovrapposti in un giorno)
             int maxRighe = 1;
             List<List<Turno>> turniPerGiorno = new ArrayList<>();
 
@@ -270,13 +280,14 @@ public class Calendario {
                         String nome = t.getMembro().getNome();
                         // Troncamento se necessario: Surname or Nome truncated to 8 chars
                         String[] parts = nome.split(" ");
-                        String shortName = (parts.length > 1) ? parts[1] : nome; 
-                        if(shortName.length() > 8) shortName = shortName.substring(0,8);
-                         
+                        String shortName = (parts.length > 1) ? parts[1] : nome;
+                        if (shortName.length() > 8)
+                            shortName = shortName.substring(0, 8);
+
                         System.out.printf(" %-8s |", shortName);
                     } else {
-                         // Empty cell if no shift for this row index (but hour block exists)
-                         System.out.print("          |");
+                        // Empty cell if no shift for this row index (but hour block exists)
+                        System.out.print("          |");
                     }
                 }
                 System.out.println();

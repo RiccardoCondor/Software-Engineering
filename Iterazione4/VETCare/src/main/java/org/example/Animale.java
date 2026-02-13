@@ -22,6 +22,31 @@ public class Animale {
         this.cartella = new CartellaClinica();
     }
 
+    public void nuovaVisita(String anamnesi, String esameObiettivo, String diagnosi) {
+        cartella.nuovaVisita(anamnesi, esameObiettivo, diagnosi);
+    }
+
+    public void confermaVisita() {
+        cartella.confermaVisita();
+    }
+
+    public boolean haVisitaInCorso() {
+        return cartella.haVisitaInCorso();
+    }
+
+    public void aggiungiTerapia(Farmaco f, int posologia, String frequenza, java.time.LocalDate inizio,
+            java.time.LocalDate fine) {
+        cartella.aggiungiTerapia(f, posologia, frequenza, inizio, fine);
+    }
+
+    public void setIdEsame(int idEsame) {
+        cartella.setIdEsame(idEsame);
+    }
+
+    public void confermaEsami(java.util.List<Esame> nuoviEsami) {
+        cartella.confermaEsami(nuoviEsami);
+    }
+
     public String getNome() {
         return nome;
     }
