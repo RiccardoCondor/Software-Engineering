@@ -11,6 +11,9 @@ public class Operazione extends Appuntamento {
     public Operazione(Animale animale, String titolo, String descrizione, LocalDateTime inizio, LocalDateTime fine,
             String tipo, Map<Integer, MembroEquipe> uomini) {
         super(animale, titolo, descrizione, inizio, fine);
+        if (tipo == null || tipo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Il tipo di operazione non può essere vuoto o nullo");
+        }
         this.tipoOperazione = tipo;
         this.membri = uomini;
     }

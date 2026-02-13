@@ -40,6 +40,8 @@ public class VetCare {
 
         membri.put(1, new Anestetista(1, "Dr. Rossi"));
         membri.put(2, new Infermiere(2, "Inf. Bianchi"));
+        membri.put(3, new Infermiere(3, "Inf. Carlo"));
+        membri.put(4, new Infermiere(4, "Inf. Arcoria"));
     }
 
     public java.util.Collection<Proprietario> getProprietari() {
@@ -580,7 +582,14 @@ public class VetCare {
                 return;
             }
 
-            String titolo = ui.leggiStringa("Titolo: ");
+            String titolo;
+            do {
+                titolo = ui.leggiStringa("Titolo: ");
+                if (titolo.trim().isEmpty()) {
+                    System.out.println("Il titolo non può essere vuoto. Riprova.");
+                }
+            } while (titolo.trim().isEmpty());
+
             String descrizione = ui.leggiStringa("Descrizione: ");
 
             // Ciclo orario
@@ -612,9 +621,23 @@ public class VetCare {
                 return;
             }
 
-            String titolo = ui.leggiStringa("Titolo Operazione: ");
+            String titolo;
+            do {
+                titolo = ui.leggiStringa("Titolo Operazione: ");
+                if (titolo.trim().isEmpty()) {
+                    System.out.println("Il titolo non può essere vuoto. Riprova.");
+                }
+            } while (titolo.trim().isEmpty());
+
             String descrizione = ui.leggiStringa("Descrizione: ");
-            String tipo = ui.leggiStringa("Tipo Operazione: ");
+
+            String tipo;
+            do {
+                tipo = ui.leggiStringa("Tipo Operazione: ");
+                if (tipo.trim().isEmpty()) {
+                    System.out.println("Il tipo non può essere vuoto. Riprova.");
+                }
+            } while (tipo.trim().isEmpty());
 
             LocalDateTime inizio = null;
             LocalDateTime fine = null;
@@ -737,7 +760,11 @@ public class VetCare {
                 break;
             }
 
-            this.magazzino.inserisciOrdine(nome, quantita);
+            try {
+                this.magazzino.inserisciOrdine(nome, quantita);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Errore: " + e.getMessage());
+            }
         }
         System.out.println("Gestione inventario completata.");
     }

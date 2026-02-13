@@ -202,22 +202,6 @@ public class Calendario {
                     }
                 }
 
-                // 2. Se non c'è appuntamento, mostra Turno
-                if (!appuntamentoTrovato) {
-                    for (Turno t : turniGiornalieri) {
-                        // Check overlap with current hour slot (oraCorrente to oraCorrente + 1)
-                        // Turno covers the slot if start <= current AND end > current
-                        // (Same logic as app checks)
-                        if (!t.getOraInizio().isAfter(oraCorrente) && t.getOraFine().isAfter(oraCorrente)) {
-                            String nome = t.getMembro().getNome();
-                            if (nome.length() > 6)
-                                nome = nome.substring(0, 6);
-                            contenutoCella = String.format(" %-6s ", nome); // Display Member Name
-                            break; // Show first found shift
-                        }
-                    }
-                }
-
                 System.out.printf("%s|", contenutoCella);
             }
             System.out.println();

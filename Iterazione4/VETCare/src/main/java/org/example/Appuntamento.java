@@ -13,8 +13,11 @@ public class Appuntamento implements Comparable<Appuntamento> {
     private final LocalDateTime fine;
     private Animale animale;
 
-    public Appuntamento(Animale animale,String titolo, String descrizione, LocalDateTime inizio, LocalDateTime fine) {
+    public Appuntamento(Animale animale, String titolo, String descrizione, LocalDateTime inizio, LocalDateTime fine) {
         this.titolo = Objects.requireNonNull(titolo, "Il titolo non può essere null");
+        if (titolo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Il titolo non può essere vuoto");
+        }
         this.descrizione = Objects.requireNonNull(descrizione, "La descrizione non può essere null");
         this.inizio = Objects.requireNonNull(inizio, "L'orario di inizio non può essere null");
         this.fine = Objects.requireNonNull(fine, "L'orario di fine non può essere null");
@@ -23,9 +26,11 @@ public class Appuntamento implements Comparable<Appuntamento> {
             throw new IllegalArgumentException("L'orario di fine deve essere dopo l'orario di inizio");
         }
     }
-    public Animale getAnimale(){
-        return  animale;
+
+    public Animale getAnimale() {
+        return animale;
     }
+
     public String getTitolo() {
         return titolo;
     }
@@ -50,7 +55,7 @@ public class Appuntamento implements Comparable<Appuntamento> {
     @Override
     public String toString() {
         return "Appuntamento{" +
-                "Animale= "+ animale.getMicrochip()+
+                "Animale= " + animale.getMicrochip() +
                 ", titolo='" + titolo + '\'' +
                 ", inizio=" + inizio +
                 ", fine=" + fine +
